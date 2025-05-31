@@ -254,54 +254,43 @@
           <div class="card-body">
             <h5 class="card-title">Buscar Zona Geografica</h5>
             <form class="needs-validation" novalidate>
-              <div class="row">
-				  
-                <div class="col-sm-6 col-lg-3">
-                  <label for="country" class="form-label">Pais</label>
-                  <select class="form-select" id="estado" required>
-                    <option value="">Seleccionar...</option>
-                    <option>Jalisco</option>
-                    <option>Chiapas</option>
-                    <option>Yucatan</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Porfavor selecciona un Estado.
-                  </div>
-                </div>
-				  
+			  <div class="row">
 				<div class="col-sm-6 col-lg-3">
-                  <label for="municipio" class="form-label">Estado</label>
-                  <select class="form-select" id="local" required>
-                    <option value="">Seleccionar...</option>
-                    <option>Jalisco</option>
-                    <option>Chiapas</option>
-                    <option>Yucatan</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Porfavor selecciona un Estado.
-                  </div>
-                </div>
+				  <label for="pais" class="form-label">País</label>
+				  <select class="form-select" id="pais">
+					<option value="">Seleccionar...</option>
+				  </select>
+				</div>
 
-                <div class="col-sm-6 col-lg-3">
-                  <label for="state" class="form-label">Municipio</label>
-                  <select class="form-select" id="municipio" required>
-                    <option value="">Seleccionar...</option>
-                    <option>Tala</option>
-                    <option>Ameca</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Selecciona un Municipio.
-                  </div>
-                </div>
+				<div class="col-sm-6 col-lg-3">
+				  <label for="estado" class="form-label">Estado</label>
+				  <select class="form-select" id="estado">
+					<option value="">Seleccionar...</option>
+				  </select>
+				</div>
 
-                
-                <div class="col-sm-6 col-lg-3">
-                  <button class="btn btn-primary col-sm-12 col-lg-12 mt-2" type="submit">Buscar</button>
-				  <a href="../Registros/RegistroZona.htm" class="btn btn-success col-sm-12 col-lg-12 mt-1" role="button">Registrar</a>
-                </div>
-				  
-              </div>
-            </form>	
+				<div class="col-sm-6 col-lg-3">
+				  <label for="municipio" class="form-label">Municipio</label>
+				  <select class="form-select" id="municipio">
+					<option value="">Seleccionar...</option>
+				  </select>
+				</div>
+
+				<div class="col-sm-6 col-lg-3">
+				  <label for="localidad" class="form-label">Localidad</label>
+				  <select class="form-select" id="localidad">
+					<option value="">Seleccionar...</option>
+				  </select>
+				</div>
+
+				<div class="col-6 mt-2 align-items-end">
+				  <button class="btn btn-primary col-6" type="submit">Buscar</button>
+				</div>
+				<div class="col-6 mt-2">
+				  <a href="../Registros/RegistroZona.htm" class="btn btn-success col-6" role="button">Registrar</a>
+				</div>
+			  </div>
+			</form>	
           </div>
         </div>
       </div>
@@ -339,54 +328,101 @@
 	  							
 </main>
 <script>
-    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-    const apiUrl = "https://smma-aobk.onrender.com/api/zonas";
+const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+const apiUrl = "https://smma-aobk.onrender.com/api/zonas";
+let zonas = [];
 
-    async function obtenerZonas() {
-      try {
-        const response = await fetch(proxyUrl + apiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+async function obtenerZonas() {
+  try {
+    const response = await fetch(proxyUrl + apiUrl);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-        const zonas = await response.json();
-        const tbody = document.getElementById('zonasBody');
-        tbody.innerHTML = '';
+    zonas = await response.json();
+    cargarSelects();
+    mostrarZonas(zonas);
+  } catch (error) {
+    console.error("Error al obtener zonas:", error);
+    alert("No se pudieron cargar los datos de zonas.");
+  }
+}
 
-        zonas.forEach(zona => {
-          const fila = `
-            <tr>
-              <td>${zona.id_zona || 'N/A'}</td>
-              <td>${zona.localidad || 'N/A'}</td>
-              <td>${zona.municipio || 'N/A'}</td>
-              <td>${zona.estado || 'N/A'}</td>
-              <td>${zona.pais || 'N/A'}</td>
-              <td>${zona.codigoPostal || 'N/A'}</td>
-              <td>
-                <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarZona('${zona.id_zona}')">Eliminar</button>
-                <button class="btn btn-info btn-sm col-lg-12" onclick="modificarZona('${zona.id_zona}')">Modificar</button>
-              </td>
-            </tr>`;
-          tbody.insertAdjacentHTML('beforeend', fila);
-        });
-      } catch (error) {
-        console.error("Error al obtener zonas:", error);
-        alert("No se pudieron cargar los datos de zonas.");
-      }
-    }
+function cargarSelects() {
+  const paisSelect = document.getElementById("pais");
+  const estadoSelect = document.getElementById("estado");
+  const municipioSelect = document.getElementById("municipio");
+  const localidadSelect = document.getElementById("localidad");
 
-    function eliminarZona(id) {
-      alert(`Eliminar zona con ID: ${id}`);
-      // Aquí puedes agregar fetch DELETE al API si lo permite.
-    }
+  // Eliminar duplicados y llenar selects
+  const paises = [...new Set(zonas.map(z => z.pais))];
+  paisSelect.innerHTML = `<option value="">Seleccionar...</option>` + paises.map(p => `<option>${p}</option>`).join('');
 
-    function modificarZona(id) {
-      alert(`Modificar zona con ID: ${id}`);
-      // Aquí puedes abrir un formulario o navegar a otra vista.
-    }
+  paisSelect.addEventListener('change', () => {
+    const estados = [...new Set(zonas.filter(z => z.pais === paisSelect.value).map(z => z.estado))];
+    estadoSelect.innerHTML = `<option value="">Seleccionar...</option>` + estados.map(e => `<option>${e}</option>`).join('');
+    municipioSelect.innerHTML = `<option value="">Seleccionar...</option>`;
+    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>`;
+  });
 
-    obtenerZonas();
-  </script>
+  estadoSelect.addEventListener('change', () => {
+    const municipios = [...new Set(zonas.filter(z => z.estado === estadoSelect.value).map(z => z.municipio))];
+    municipioSelect.innerHTML = `<option value="">Seleccionar...</option>` + municipios.map(m => `<option>${m}</option>`).join('');
+    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>`;
+  });
+
+  municipioSelect.addEventListener('change', () => {
+    const localidades = [...new Set(zonas.filter(z => z.municipio === municipioSelect.value).map(z => z.localidad))];
+    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>` + localidades.map(l => `<option>${l}</option>`).join('');
+  });
+}
+
+function mostrarZonas(lista) {
+  const tbody = document.getElementById('zonasBody');
+  tbody.innerHTML = '';
+  lista.forEach(zona => {
+    const fila = `
+      <tr>
+        <td>${zona.id_zona || 'N/A'}</td>
+        <td>${zona.localidad || 'N/A'}</td>
+        <td>${zona.municipio || 'N/A'}</td>
+        <td>${zona.estado || 'N/A'}</td>
+        <td>${zona.pais || 'N/A'}</td>
+        <td>${zona.codigoPostal || 'N/A'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarZona('${zona.id_zona}')">Eliminar</button>
+          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarZona('${zona.id_zona}')">Modificar</button>
+        </td>
+      </tr>`;
+    tbody.insertAdjacentHTML('beforeend', fila);
+  });
+}
+
+document.querySelector("form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const pais = document.getElementById("pais").value;
+  const estado = document.getElementById("estado").value;
+  const municipio = document.getElementById("municipio").value;
+  const localidad = document.getElementById("localidad").value;
+
+  const filtrado = zonas.filter(z => {
+    return (!pais || z.pais === pais) &&
+           (!estado || z.estado === estado) &&
+           (!municipio || z.municipio === municipio) &&
+           (!localidad || z.localidad === localidad);
+  });
+
+  mostrarZonas(filtrado);
+});
+
+function eliminarZona(id) {
+  alert(`Eliminar zona con ID: ${id}`);
+}
+
+function modificarZona(id) {
+  alert(`Modificar zona con ID: ${id}`);
+}
+
+obtenerZonas();
+</script>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
 </html>

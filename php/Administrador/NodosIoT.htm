@@ -253,52 +253,38 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Seleccionar NodoIoT</h5>
-            <form class="needs-validation" novalidate>
-              <div class="row">
-                <div class="col-sm-6 col-lg-3">
-                  <label for="country" class="form-label">Estado</label>
-                  <select class="form-select" id="estado" required>
-                    <option value="">Seleccionar...</option>
-                    <option>Jalisco</option>
-                    <option>Chiapas</option>
-                    <option>Yucatan</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Porfavor selecciona un Estado.
-                  </div>
-                </div>
+            <form class="needs-validation mb-4" novalidate>
+				<div class="row">
+				  <div class="col-sm-6 col-lg-3">
+					<label for="estado" class="form-label">Estado</label>
+					<select class="form-select" id="estado">
+					  <option value="">Seleccionar...</option>
+					</select>
+					<div class="invalid-feedback">Por favor selecciona un Estado.</div>
+				  </div>
 
-                <div class="col-sm-6 col-lg-3">
-                  <label for="state" class="form-label">Municipio</label>
-                  <select class="form-select" id="municipio" required>
-                    <option value="">Seleccionar...</option>
-                    <option>Tala</option>
-                    <option>Ameca</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Selecciona un Municipio.
-                  </div>
-                </div>
+				  <div class="col-sm-6 col-lg-3">
+					<label for="municipio" class="form-label">Municipio</label>
+					<select class="form-select" id="municipio">
+					  <option value="">Seleccionar...</option>
+					</select>
+					<div class="invalid-feedback">Selecciona un Municipio.</div>
+				  </div>
 
-                <div class="col-sm-6 col-lg-3">
-                  <label for="state" class="form-label">Localidad</label>
-                  <select class="form-select" id="localidad" required>
-                    <option value="">Selecciona...</option>
-                    <option>Ameca centro</option>
-                    <option>Cuvalles</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Please provide a valid state.
-                  </div>
-                </div>
-                
-                <div class="col-sm-6 col-lg-3">
-                  <button class="btn btn-primary col-sm-12 col-lg-12 mt-2" type="submit">Buscar</button>
-				  <a href="../Registros/RegistroNodos.htm" class="btn btn-success col-sm-12 col-lg-12 mt-1" role="button">Registrar</a>
-                </div>
-				  
-              </div>
-            </form>	
+				  <div class="col-sm-6 col-lg-3">
+					<label for="localidad" class="form-label">Localidad</label>
+					<select class="form-select" id="localidad">
+					  <option value="">Seleccionar...</option>
+					</select>
+					<div class="invalid-feedback">Selecciona una Localidad.</div>
+				  </div>
+
+				  <div class="col-sm-6 col-lg-3">
+					<button class="btn btn-primary col-12 mt-2" type="submit">Buscar</button>
+					<a href="../Registros/RegistroNodos.htm" class="btn btn-success col-12 mt-2" role="button">Registrar</a>
+				  </div>
+				</div>
+			  </form>	
           </div>
         </div>
       </div>
@@ -337,92 +323,148 @@
 </main>
 	  
 <script>
-  const proxyUrl = ' ';
-  const apiNodos = 'https://smma-aobk.onrender.com/api/nodos';
-  const apiZonas = 'https://smma-aobk.onrender.com/api/zonas';
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const apiNodos = 'https://smma-aobk.onrender.com/api/nodos';
+    const apiZonas = 'https://smma-aobk.onrender.com/api/zonas';
 
-  async function obtenerZonas() {
-    const res = await fetch(proxyUrl + apiZonas);
-    if (!res.ok) throw new Error('Error al obtener zonas');
-    const data = await res.json();
-    // Crear un mapa id_zona => zona para acceso rápido
-    const mapaZonas = new Map();
-    data.forEach(zona => {
-      mapaZonas.set(zona.id_zona || zona._id, zona);
-    });
-    return mapaZonas;
-  }
+    const selectEstado = document.getElementById('estado');
+    const selectMunicipio = document.getElementById('municipio');
+    const selectLocalidad = document.getElementById('localidad');
+    const form = document.querySelector('form');
 
-  async function obtenerDatos() {
-    try {
-      const [resNodos, mapaZonas] = await Promise.all([
-        fetch(proxyUrl + apiNodos),
-        obtenerZonas()
-      ]);
+    let zonasDisponibles = [];
 
-      if (!resNodos.ok) throw new Error('Error al obtener nodos');
-
-      const nodos = await resNodos.json();
-      const tbody = document.getElementById('tabla-cuerpo');
-      tbody.innerHTML = '';
-
-      nodos.forEach(nodo => {
-        const zona = mapaZonas.get(nodo.id_zona) || {};
-
-        // Unir nombres de sensores separados por coma
-        const sensoresNombres = (nodo.sensores || [])
-		  .map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
-		  .join(' ');
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${nodo.nombre || ''}</td>
-          <td>${nodo.cordenadas || ''}</td>
-          <td>${nodo.fecha_imp || ''}</td>
-          <td>${nodo.mac || ''}</td>
-          <td>${sensoresNombres}</td>
-          <td>${zona.localidad || ''}</td>
-          <td>${zona.municipio || ''}</td>
-          <td>${zona.estado || ''}</td>
-          <td>${zona.codigoPostal || ''}</td>
-          <td><button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarNodo('${nodo.id_nodo}')">Eliminar</button>
-          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarNodo('${nodo.id_nodo}')">Modificar</button></td>
-        `;
-        tbody.appendChild(tr);
+    function llenarSelect(select, items) {
+      select.innerHTML = '<option value="">Seleccionar...</option>';
+      [...new Set(items)].forEach(item => {
+        const option = document.createElement('option');
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
       });
-
-    } catch (error) {
-      console.error('Error al obtener datos:', error);
-      alert('Error al obtener datos. Revisa consola.');
     }
-  }
 
-  async function eliminarNodo(id) {
-    if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
-    try {
-      const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/nodos/${id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        alert('Nodo eliminado exitosamente');
-        obtenerDatos();
-      } else {
-        alert('Error al eliminar nodo');
+    async function obtenerZonas() {
+      const res = await fetch(proxyUrl + apiZonas);
+      if (!res.ok) throw new Error('Error al obtener zonas');
+      const data = await res.json();
+      zonasDisponibles = data;
+
+      const estados = zonasDisponibles.map(z => z.estado);
+      llenarSelect(selectEstado, estados);
+    }
+
+    async function obtenerDatos(filtro = {}) {
+      try {
+        const [resNodos] = await Promise.all([
+          fetch(proxyUrl + apiNodos)
+        ]);
+
+        if (!resNodos.ok) throw new Error('Error al obtener nodos');
+        const nodos = await resNodos.json();
+        const tbody = document.getElementById('tabla-cuerpo');
+        tbody.innerHTML = '';
+
+        const mapaZonas = new Map();
+        zonasDisponibles.forEach(zona => {
+          mapaZonas.set(zona.id_zona || zona._id, zona);
+        });
+
+        const nodosFiltrados = nodos.filter(nodo => {
+          const zona = mapaZonas.get(nodo.id_zona) || {};
+          return (!filtro.estado || zona.estado === filtro.estado) &&
+                 (!filtro.municipio || zona.municipio === filtro.municipio) &&
+                 (!filtro.localidad || zona.localidad === filtro.localidad);
+        });
+
+        nodosFiltrados.forEach(nodo => {
+          const zona = mapaZonas.get(nodo.id_zona) || {};
+
+          const sensoresNombres = (nodo.sensores || [])
+            .map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
+            .join(' ');
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${nodo.nombre || ''}</td>
+            <td>${nodo.cordenadas || ''}</td>
+            <td>${nodo.fecha_imp || ''}</td>
+            <td>${nodo.mac || ''}</td>
+            <td>${sensoresNombres}</td>
+            <td>${zona.localidad || ''}</td>
+            <td>${zona.municipio || ''}</td>
+            <td>${zona.estado || ''}</td>
+            <td>${zona.codigoPostal || ''}</td>
+            <td>
+              <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarNodo('${nodo.id_nodo}')">Eliminar</button>
+              <button class="btn btn-info btn-sm col-12" onclick="modificarNodo('${nodo.id_nodo}')">Modificar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (error) {
+        console.error('Error al obtener datos:', error);
+        alert('Error al obtener datos. Revisa consola.');
       }
-    } catch (error) {
-      alert('Error al eliminar nodo. Revisa consola.');
-      console.error(error);
     }
-  }
 
-  function modificarNodo(id) {
-    alert('Función modificar nodo para id: ' + id);
-    // Aquí pondrías la lógica para mostrar formulario y actualizar el nodo
-  }
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const filtro = {
+        estado: selectEstado.value || null,
+        municipio: selectMunicipio.value || null,
+        localidad: selectLocalidad.value || null
+      };
+      obtenerDatos(filtro);
+    });
 
-  // Cargar datos al inicio
-  obtenerDatos();
-</script>
+    async function eliminarNodo(id) {
+      if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
+      try {
+        const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/nodos/${id}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          alert('Nodo eliminado exitosamente');
+          obtenerDatos();
+        } else {
+          alert('Error al eliminar nodo');
+        }
+      } catch (error) {
+        alert('Error al eliminar nodo. Revisa consola.');
+        console.error(error);
+      }
+    }
+
+    function modificarNodo(id) {
+      alert('Función modificar nodo para id: ' + id);
+    }
+
+    // Eventos en cascada
+    selectEstado.addEventListener('change', () => {
+      const estadoSel = selectEstado.value;
+      const municipios = zonasDisponibles
+        .filter(z => z.estado === estadoSel)
+        .map(z => z.municipio);
+      llenarSelect(selectMunicipio, municipios);
+
+      selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+    });
+
+    selectMunicipio.addEventListener('change', () => {
+      const estadoSel = selectEstado.value;
+      const municipioSel = selectMunicipio.value;
+      const localidades = zonasDisponibles
+        .filter(z => z.estado === estadoSel && z.municipio === municipioSel)
+        .map(z => z.localidad);
+      llenarSelect(selectLocalidad, localidades);
+    });
+
+    // Inicial
+    obtenerZonas().then(() => obtenerDatos());
+  </script>
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
 </body>
