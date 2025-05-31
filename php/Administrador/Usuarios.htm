@@ -284,8 +284,6 @@
 				<thead class="thead-dark">
 				  <tr>
 					<th>Nombre</th>
-					<th>Apellido Paterno</th>
-					<th>Apellido Materno</th>
 					<th>Fecha Nacimiento</th>
 					<th>Rol</th>
 					<th>Correo</th>
@@ -331,29 +329,29 @@
   }
 
   function mostrarUsuarios(lista) {
-    const tbody = document.getElementById('usuariosBody');
-    tbody.innerHTML = '';
+  const tbody = document.getElementById('usuariosBody');
+  tbody.innerHTML = '';
 
-    lista.forEach(usuario => {
-      const fila = `
-        <tr>
-          <td>${usuario.nombre || 'N/A'}</td>
-          <td>${usuario.apellido_pa || 'N/A'}</td>
-          <td>${usuario.apellido_ma || 'N/A'}</td>
-          <td>${usuario.fechaNacimiento || 'N/A'}</td>
-          <td>${usuario.Rol || 'N/A'}</td>
-          <td>${usuario.correo || 'N/A'}</td>
-          <td>${usuario.institucion || 'N/A'}</td>
-          <td>${usuario.cargo || 'N/A'}</td>
-          <td>${usuario.matricula || 'N/A'}</td>
-          <td>
-            <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
-            <button class="btn btn-info btn-sm col-lg-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
-          </td>
-        </tr>`;
-      tbody.insertAdjacentHTML('beforeend', fila);
-    });
-  }
+  lista.forEach(usuario => {
+    const nombreCompleto = `${usuario.nombre || ''} ${usuario.apellido_pa || ''} ${usuario.apellido_ma || ''}`.trim();
+
+    const fila = `
+      <tr>
+        <td>${nombreCompleto}</td>
+        <td>${usuario.fechaNacimiento || 'N/A'}</td>
+        <td>${usuario.Rol || 'N/A'}</td>
+        <td>${usuario.correo || 'N/A'}</td>
+        <td>${usuario.institucion || 'N/A'}</td>
+        <td>${usuario.cargo || 'N/A'}</td>
+        <td>${usuario.matricula || 'N/A'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
+          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
+        </td>
+      </tr>`;
+    tbody.insertAdjacentHTML('beforeend', fila);
+  });
+}
 
   function normalizarTexto(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
