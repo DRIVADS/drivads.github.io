@@ -259,17 +259,13 @@
 			</svg>
 				Buscar Usuarios</h5>
             <form class="needs-validation" novalidate>
-              <div class="row">
-				  
-                <div class="col-sm-6 col-lg-9">
-                  <label for="country" class="form-label">Nombre</label>
-                  <input type="nombre" class="form-control rounded-3" id="nombre" placeholder="Nombre">
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                  <button class="btn btn-primary col-sm-12 col-lg-12 mt-2" type="submit">Buscar</button>
-                </div>
-              </div>
-            </form>	
+			  <div class="row">
+				<div class="col-sm-6 col-lg-12">
+				  <label for="nombre" class="form-label">Nombre</label>
+				  <input type="text" class="form-control rounded-3" id="nombre" placeholder="Nombre">
+				</div>
+			  </div>
+			</form>
           </div>
         </div>
       </div>
@@ -315,57 +311,79 @@
 	  							
 </main>
 <script>
-    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-    const apiUrl = "https://smma-aobk.onrender.com/api/usuarios";
+  const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+  const apiUrl = "https://smma-aobk.onrender.com/api/usuarios";
+  let usuariosData = [];
 
-    async function obtenerUsuarios() {
-      try {
-        const response = await fetch(proxyUrl + apiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const usuarios = await response.json();
-        const tbody = document.getElementById('usuariosBody');
-        tbody.innerHTML = '';
-
-        usuarios.forEach(usuario => {
-          const fila = `
-            <tr>
-              <td>${usuario.nombre || 'N/A'}</td>
-              <td>${usuario.apellido_pa || 'N/A'}</td>
-              <td>${usuario.apellido_ma || 'N/A'}</td>
-              <td>${usuario.fechaNacimiento || 'N/A'}</td>
-              <td>${usuario.Rol || 'N/A'}</td>
-              <td>${usuario.correo || 'N/A'}</td>
-              <td>${usuario.institucion || 'N/A'}</td>
-              <td>${usuario.cargo || 'N/A'}</td>
-              <td>${usuario.matricula || 'N/A'}</td>
-              <td>
-                <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
-                <button class="btn btn-info btn-sm col-lg-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
-              </td>
-            </tr>`;
-          tbody.insertAdjacentHTML('beforeend', fila);
-        });
-      } catch (error) {
-        console.error("Error al obtener usuarios:", error);
-        alert("No se pudieron cargar los datos de usuarios.");
+  async function obtenerUsuarios() {
+    try {
+      const response = await fetch(proxyUrl + apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }
 
-    function eliminarUsuario(matricula) {
-      alert(`Eliminar usuario con matrícula: ${matricula}`);
-      // Aquí puedes hacer un fetch DELETE al API si corresponde.
+      usuariosData = await response.json();
+      mostrarUsuarios(usuariosData);
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      alert("No se pudieron cargar los datos de usuarios.");
     }
+  }
 
-    function modificarUsuario(matricula) {
-      alert(`Modificar usuario con matrícula: ${matricula}`);
-      // Aquí puedes abrir un formulario o hacer una redirección para editar.
-    }
+  function mostrarUsuarios(lista) {
+    const tbody = document.getElementById('usuariosBody');
+    tbody.innerHTML = '';
 
-    obtenerUsuarios();
-  </script>
+    lista.forEach(usuario => {
+      const fila = `
+        <tr>
+          <td>${usuario.nombre || 'N/A'}</td>
+          <td>${usuario.apellido_pa || 'N/A'}</td>
+          <td>${usuario.apellido_ma || 'N/A'}</td>
+          <td>${usuario.fechaNacimiento || 'N/A'}</td>
+          <td>${usuario.Rol || 'N/A'}</td>
+          <td>${usuario.correo || 'N/A'}</td>
+          <td>${usuario.institucion || 'N/A'}</td>
+          <td>${usuario.cargo || 'N/A'}</td>
+          <td>${usuario.matricula || 'N/A'}</td>
+          <td>
+            <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
+            <button class="btn btn-info btn-sm col-lg-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
+          </td>
+        </tr>`;
+      tbody.insertAdjacentHTML('beforeend', fila);
+    });
+  }
+
+  function normalizarTexto(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+
+  function filtrarUsuariosPorNombre(valorBuscado) {
+    const texto = normalizarTexto(valorBuscado);
+
+    const filtrados = usuariosData.filter(usuario => {
+      const nombreCompleto = `${usuario.nombre || ''} ${usuario.apellido_pa || ''} ${usuario.apellido_ma || ''}`;
+      return normalizarTexto(nombreCompleto).includes(texto);
+    });
+
+    mostrarUsuarios(filtrados);
+  }
+
+  function eliminarUsuario(matricula) {
+    alert(`Eliminar usuario con matrícula: ${matricula}`);
+  }
+
+  function modificarUsuario(matricula) {
+    alert(`Modificar usuario con matrícula: ${matricula}`);
+  }
+
+  document.getElementById('nombre').addEventListener('input', (e) => {
+    filtrarUsuariosPorNombre(e.target.value);
+  });
+
+  obtenerUsuarios();
+</script>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
