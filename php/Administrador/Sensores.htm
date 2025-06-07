@@ -311,6 +311,44 @@
 </main>
 	  							
 </main>
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+<!-- Modal -->
+<!-- Modal Modificar Sensor -->
+<div class="modal fade" id="modalModificar" tabindex="-1" aria-labelledby="modalModificarLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalModificarLabel">Modificar Sensor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formModificarSensor">
+          <input type="hidden" id="sensorIdM">
+          <div class="mb-3">
+            <label for="tipoSensorM" class="form-label">Tipo</label>
+            <select class="form-select" id="tipoSensorM">
+              <option value="analogico">Analógico</option>
+              <option value="digital">Digital</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="nombreSensorM" class="form-label">Nombre del Sensor</label>
+            <input type="text" class="form-control" id="nombreSensorM">
+          </div>
+          <div class="mb-3">
+            <label for="tipoDatoM" class="form-label">Tipo de Dato</label>
+            <input type="text" class="form-control" id="tipoDatoM">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarCambios()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const proxyUrl = "https://cors-anywhere.herokuapp.com/";
   const apiSensores = "https://smma-aobk.onrender.com/api/sensors";
@@ -364,8 +402,11 @@
           <td>${sensor.analogico_digital || 'N/A'}</td>
           <td>${sensor.id_sensor || 'N/A'}</td>
           <td>
-            <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarSensor('${sensor.id_sensor}')">Eliminar</button>
-            <button class="btn btn-info btn-sm col-lg-12" onclick="modificarSensor('${sensor.id_sensor}')">Modificar</button>
+            <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarSensor('${sensor.id_sensor}')">Eliminar</button>
+            <button class="btn btn-info btn-sm col-lg-12"
+			  onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">
+			  Modificar
+			</button>
           </td>
         </tr>`;
       tbody.insertAdjacentHTML('beforeend', fila);
@@ -387,13 +428,101 @@
   document.getElementById('tipoDato').addEventListener('change', filtrarSensores);
   document.getElementById('tipoSensor').addEventListener('change', filtrarSensores);
 
-  function eliminarSensor(id) {
-    alert(`Eliminar sensor con ID: ${id}`);
+  async function eliminarSensor(id_sensor) {
+	  if (!confirm('¿Estás seguro de eliminar este sensor?')) return;
+	  try {
+		const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/sensors/${id_sensor}`, {
+		  method: 'DELETE'
+		});
+		if (res.ok) {
+		  alert('Sensor eliminado exitosamente');
+		  obtenerSensores(); // Asegúrate de tener esta función para recargar la tabla de sensores
+		} else {
+		  alert('Error al eliminar sensor');
+		}
+	  } catch (error) {
+		alert('Error al eliminar sensor. Revisa consola.');
+		console.error(error);
+	  }
+	}
+
+
+	function modificarSensor(id, tipo, nombre, dato) {
+    document.getElementById("sensorIdM").value = id;
+		
+    const tipoNormalizado = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+	document.getElementById("tipoSensorM").value = tipoNormalizado;
+		
+    document.getElementById("nombreSensorM").value = nombre;
+    document.getElementById("tipoDatoM").value = dato;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalModificar'));
+    modal.show();
   }
 
-  function modificarSensor(id) {
-    alert(`Modificar sensor con ID: ${id}`);
-  }
+  function guardarCambios() {
+	  const id = document.getElementById("sensorIdM").value;
+	  const tipo = document.getElementById("tipoSensorM").value.toLowerCase();
+	  const nombre = document.getElementById("nombreSensorM").value.trim();
+	  const dato = document.getElementById("tipoDatoM").value.trim();
+
+	  // Validación simple
+	  if (!nombre || !tipo || !dato) {
+		mostrarAlerta('Por favor completa todos los campos.', 'danger');
+		return;
+	  }
+
+	  const sensorActualizado = {
+		analogico_digital: tipo,
+		nombre: nombre,
+		tipo_dato: dato
+	  };
+
+	  fetch(`https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/sensors/${id}`, {
+		method: 'PUT',
+		headers: {
+		  'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(sensorActualizado)
+	  })
+	  .then(response => {
+		if (!response.ok) throw new Error('Error al actualizar');
+		return response.json();
+	  })
+	  .then(data => {
+		const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificar'));
+		modal.hide();
+
+		mostrarAlerta('Sensor actualizado correctamente.', 'success');
+		obtenerSensores();
+	  })
+	  .catch(error => {
+		console.error('Error al guardar cambios:', error);
+		mostrarAlerta('Error al guardar los cambios.', 'danger');
+	  });
+	}
+
+
+  function mostrarAlerta(mensaje, tipo = 'info') {
+	  const alertId = `alert-${Date.now()}`;
+	  const alertHTML = `
+		<div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+		  ${mensaje}
+		  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+		</div>
+	  `;
+
+	  const container = document.getElementById('alertContainer');
+	  container.insertAdjacentHTML('beforeend', alertHTML);
+
+	  // Eliminar automáticamente después de 4 segundos
+	  setTimeout(() => {
+		const alertEl = document.getElementById(alertId);
+		if (alertEl) alertEl.remove();
+	  }, 4000);
+ }
+
+
 
   obtenerSensores();
 </script>
