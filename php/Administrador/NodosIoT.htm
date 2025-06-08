@@ -319,7 +319,74 @@
     </div>
   </div>
 </main>
-	  							
+<!-- Contenedor para alertas -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+<!-- Modal para modificar nodo -->
+<div class="modal fade" id="modalModificarNodo" tabindex="-1" aria-labelledby="modalModificarNodoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalModificarNodoLabel">Modificar Nodo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formModificarNodo" class="needs-validation" novalidate>
+          <input type="hidden" id="idNodoM">
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="nombreNodoM" class="form-label">Nombre del Nodo</label>
+              <input type="text" class="form-control" id="nombreNodoM" required>
+              <div class="invalid-feedback">Ingresa un nombre válido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="zonaNodoM" class="form-label">Zona Geográfica</label>
+              <select class="form-select" id="zonaNodoM" required>
+                <option value="">Cargando zonas...</option>
+              </select>
+              <div class="invalid-feedback">Selecciona una zona válida.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="fechaInstalacionM" class="form-label">Fecha de Instalación</label>
+              <input type="date" class="form-control" id="fechaInstalacionM" required>
+              <div class="invalid-feedback">Ingresa una fecha válida.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="ipMacM" class="form-label">IP o Dirección MAC</label>
+              <input type="text" class="form-control" id="ipMacM" required>
+              <div class="invalid-feedback">Ingresa una dirección IP o MAC válida.</div>
+            </div>
+
+            <div class="col-md-12">
+              <label for="coordenadasM" class="form-label">Coordenadas</label>
+              <input type="text" class="form-control" id="coordenadasM" required>
+              <div class="invalid-feedback">Ingresa coordenadas válidas.</div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+          <h4 class="mb-3">Asociar Sensores</h4>
+          <div id="sensorContainerM"></div>
+          <button type="button" class="btn btn-secondary mt-3" id="addSensorM">Agregar Sensor</button>
+          
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarCambiosNodo()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contenedor de alertas -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+	
 </main>
 	  
 <script>
@@ -464,6 +531,207 @@
     // Inicial
     obtenerZonas().then(() => obtenerDatos());
   </script>
+
+<script>
+  const apiBase = 'https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com';
+
+// Mostrar alertas tipo Bootstrap
+function mostrarAlerta(mensaje, tipo = 'info') {
+  const alertId = `alert-${Date.now()}`;
+  const alertHTML = `
+    <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  `;
+
+  const container = document.getElementById('alertContainer');
+  container.insertAdjacentHTML('beforeend', alertHTML);
+
+  setTimeout(() => {
+    const alertEl = document.getElementById(alertId);
+    if (alertEl) alertEl.remove();
+  }, 4000);
+}
+
+// Cargar zonas en modal de modificar nodo
+async function cargarZonasModal() {
+  try {
+    const res = await fetch(`${apiBase}/api/zonas`);
+    if (!res.ok) throw new Error('No se pudieron cargar las zonas');
+    const zonas = await res.json();
+
+    const selectZona = document.getElementById("zonaNodoM");
+    selectZona.innerHTML = '<option value="">Selecciona una zona...</option>';
+
+    zonas.forEach(zona => {
+      const option = document.createElement("option");
+      option.value = zona.id_zona;
+      option.textContent = `${zona.localidad}, ${zona.municipio}, ${zona.estado}, ${zona.pais}`;
+      selectZona.appendChild(option);
+    });
+  } catch (error) {
+    mostrarAlerta('Error al cargar zonas.', 'danger');
+    console.error(error);
+  }
+}
+
+// Función para abrir modal y cargar datos de nodo
+async function modificarNodo(id_nodo) {
+  try {
+    // Cargar zonas en select (para que esté disponible al abrir)
+    await cargarZonasModal();
+
+    // Obtener nodo
+    const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`);
+    if (!res.ok) throw new Error('Nodo no encontrado');
+    const nodo = await res.json();
+
+    // Rellenar inputs
+    document.getElementById("idNodoM").value = nodo.id_nodo;
+    document.getElementById("nombreNodoM").value = nodo.nombre;
+    document.getElementById("zonaNodoM").value = nodo.id_zona;
+    document.getElementById("fechaInstalacionM").value = nodo.fecha_imp;
+    document.getElementById("ipMacM").value = nodo.mac;
+    document.getElementById("coordenadasM").value = nodo.cordenadas;
+
+    // Cargar sensores disponibles
+    const resSensores = await fetch(`${apiBase}/api/SENSORS`);
+    if (!resSensores.ok) throw new Error('No se pudieron cargar sensores');
+    const sensoresDisponibles = await resSensores.json();
+
+    const sensorContainer = document.getElementById("sensorContainerM");
+    sensorContainer.innerHTML = ''; // limpiar
+
+    // Agregar un select para cada sensor del nodo, seleccionando el sensor correcto
+    nodo.sensores.forEach(sensorNodo => {
+      sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, sensorNodo));
+    });
+
+    // Si el nodo no tiene sensores, agregar al menos uno vacío para que se pueda elegir
+    if (nodo.sensores.length === 0) {
+      sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, null));
+    }
+
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('modalModificarNodo'));
+    modal.show();
+
+  } catch (error) {
+    mostrarAlerta('Error al cargar el nodo o sensores.', 'danger');
+    console.error(error);
+  }
+}
+
+// Función para crear el div con select de sensores, con opción seleccionada si aplica
+function crearSensorSelect(sensoresDisponibles, sensorSeleccionado) {
+  const div = document.createElement("div");
+  div.classList.add("row", "g-3", "sensor-entry");
+
+  const selectHTML = `
+    <div class="col-md-10">
+      <label class="form-label">Seleccionar Sensor</label>
+      <select class="form-select sensor-select" required>
+        <option value="">Selecciona un sensor...</option>
+        ${sensoresDisponibles.map(sensor =>
+          `<option value='${JSON.stringify(sensor)}' ${sensorSeleccionado && sensor.id_sensor === sensorSeleccionado.id_sensor ? "selected" : ""}>
+            ${sensor.nombre} (${sensor.tipo_dato})
+          </option>`
+        ).join('')}
+      </select>
+      <div class="invalid-feedback">Selecciona un sensor válido.</div>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="button" class="btn btn-danger remove-sensor">−</button>
+    </div>
+  `;
+
+  div.innerHTML = selectHTML;
+
+  // Agregar evento eliminar sensor
+  div.querySelector(".remove-sensor").addEventListener("click", () => {
+    div.remove();
+  });
+
+  return div;
+}
+
+// Botón para agregar sensor nuevo en modal
+document.getElementById("addSensorM").addEventListener("click", async () => {
+  try {
+    const resSensores = await fetch(`${apiBase}/api/SENSORS`);
+    if (!resSensores.ok) throw new Error('No se pudieron cargar sensores');
+    const sensoresDisponibles = await resSensores.json();
+
+    const sensorContainer = document.getElementById("sensorContainerM");
+    sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, null));
+  } catch (error) {
+    mostrarAlerta('Error al cargar sensores para agregar.', 'danger');
+    console.error(error);
+  }
+});
+
+// Guardar cambios del nodo
+async function guardarCambiosNodo() {
+  const form = document.getElementById("formModificarNodo");
+  if (!form.checkValidity()) {
+    form.classList.add('was-validated');
+    mostrarAlerta('Por favor completa todos los campos correctamente.', 'danger');
+    return;
+  }
+
+  const id_nodo = document.getElementById("idNodoM").value;
+  const nombre = document.getElementById("nombreNodoM").value.trim();
+  const id_zona = document.getElementById("zonaNodoM").value;
+  const fecha_imp = document.getElementById("fechaInstalacionM").value;
+  const mac = document.getElementById("ipMacM").value.trim();
+  const coordenadas = document.getElementById("coordenadasM").value.trim();
+
+  // Obtener sensores seleccionados
+  const selects = document.querySelectorAll("#sensorContainerM select.sensor-select");
+  const sensoresSeleccionados = [];
+  for (const select of selects) {
+    if (!select.value) {
+      mostrarAlerta('Todos los sensores deben ser seleccionados.', 'danger');
+      return;
+    }
+    sensoresSeleccionados.push(JSON.parse(select.value));
+  }
+
+  // Construir objeto para enviar
+  const nodoActualizado = {
+    nombre,
+    id_zona,
+    fecha_imp,
+    mac,
+    cordenadas: coordenadas,
+    sensores: sensoresSeleccionados
+  };
+
+  try {
+    const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nodoActualizado)
+    });
+
+    if (!res.ok) throw new Error('Error al actualizar nodo');
+
+    // Cerrar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarNodo'));
+    modal.hide();
+
+    mostrarAlerta('Nodo actualizado correctamente.', 'success');
+
+    // Aquí deberías recargar la tabla o datos para reflejar cambios
+    if (typeof obtenerNodos === 'function') obtenerNodos();
+
+  } catch (error) {
+    console.error(error);
+    mostrarAlerta('No se pudieron guardar los cambios del nodo.', 'danger');
+  }
+}
+</script>
 
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
