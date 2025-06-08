@@ -324,7 +324,33 @@
     </div>
   </div>
 </main>
-	  							
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+<!-- Modal Modificar Zona -->
+<div class="modal fade" id="modalModificarZona" tabindex="-1" aria-labelledby="modalModificarZonaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalModificarZonaLabel">Modificar Zona</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formModificarZona">
+          <input type="hidden" id="zonaIdM">
+          <div class="mb-3"><label class="form-label">Localidad</label><input type="text" class="form-control" id="localidadZonaM"></div>
+          <div class="mb-3"><label class="form-label">Municipio</label><input type="text" class="form-control" id="municipioZonaM"></div>
+          <div class="mb-3"><label class="form-label">Estado</label><input type="text" class="form-control" id="estadoZonaM"></div>
+          <div class="mb-3"><label class="form-label">País</label><input type="text" class="form-control" id="paisZonaM"></div>
+          <div class="mb-3"><label class="form-label">Código Postal</label><input type="text" class="form-control" id="codigoPostalZonaM"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarCambiosZona()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+	
 </main>
 <script>
 const proxyUrl = "https://cors-anywhere.herokuapp.com/";
@@ -387,10 +413,9 @@ function mostrarZonas(lista) {
         <td>${zona.pais || 'N/A'}</td>
         <td>${zona.codigoPostal || 'N/A'}</td>
         <td>
-          <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarZona('${zona.id_zona}')">Eliminar</button>
-          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarZona('${zona.id_zona}')">Modificar</button>
-        </td>
-      </tr>`;
+          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarZona('${zona.id_zona}')">Eliminar</button>
+          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarZona('${zona.id_zona}', '${zona.localidad}', '${zona.municipio}', '${zona.estado}', '${zona.pais}', '${zona.codigoPostal}')">
+  			Modificar</button></td></tr>`;
     tbody.insertAdjacentHTML('beforeend', fila);
   });
 }
@@ -412,12 +437,99 @@ document.querySelector("form").addEventListener("submit", function (e) {
   mostrarZonas(filtrado);
 });
 
-function eliminarZona(id) {
-  alert(`Eliminar zona con ID: ${id}`);
+async function eliminarZona(id_zona) {
+  if (!confirm('¿Estás seguro de eliminar esta zona?')) return;
+  try {
+    const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/zonas/${id_zona}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) {
+      alert('Zona eliminada exitosamente');
+      obtenerZonas(); // Asegúrate de tener una función que recargue la tabla de zonas
+    } else {
+      alert('Error al eliminar zona');
+    }
+  } catch (error) {
+    alert('Error al eliminar zona. Revisa consola.');
+    console.error(error);
+  }
 }
 
-function modificarZona(id) {
-  alert(`Modificar zona con ID: ${id}`);
+function mostrarAlerta(mensaje, tipo = 'info') {
+  const alertId = `alert-${Date.now()}`;
+  const alertHTML = `
+    <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  `;
+
+  const container = document.getElementById('alertContainer');
+  container.insertAdjacentHTML('beforeend', alertHTML);
+
+  setTimeout(() => {
+    const alertEl = document.getElementById(alertId);
+    if (alertEl) alertEl.remove();
+  }, 4000);
+}
+
+// Mostrar modal con datos
+function modificarZona(id, localidad, municipio, estado, pais, codigoPostal) {
+  document.getElementById("zonaIdM").value = id;
+  document.getElementById("localidadZonaM").value = localidad;
+  document.getElementById("municipioZonaM").value = municipio;
+  document.getElementById("estadoZonaM").value = estado;
+  document.getElementById("paisZonaM").value = pais;
+  document.getElementById("codigoPostalZonaM").value = codigoPostal;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalModificarZona'));
+  modal.show();
+}
+
+// Guardar cambios
+function guardarCambiosZona() {
+  const id = document.getElementById("zonaIdM").value;
+  const localidad = document.getElementById("localidadZonaM").value.trim();
+  const municipio = document.getElementById("municipioZonaM").value.trim();
+  const estado = document.getElementById("estadoZonaM").value.trim();
+  const pais = document.getElementById("paisZonaM").value.trim();
+  const codigoPostal = document.getElementById("codigoPostalZonaM").value.trim();
+
+  if (!localidad || !municipio || !estado || !pais || !codigoPostal) {
+    mostrarAlerta('Todos los campos son obligatorios.', 'danger');
+    return;
+  }
+
+  const zonaActualizada = {
+    localidad,
+    municipio,
+    estado,
+    pais,
+    codigoPostal
+  };
+
+  fetch(`https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/zonas/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(zonaActualizada)
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Error al actualizar zona');
+    return response.json();
+  })
+  .then(data => {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarZona'));
+    modal.hide();
+
+    mostrarAlerta('Zona actualizada correctamente.', 'success');
+    obtenerZonas(); // Asume que tienes una función para recargar la tabla
+  })
+  .catch(error => {
+    console.error('Error al guardar zona:', error);
+    mostrarAlerta('No se pudieron guardar los cambios de zona.', 'danger');
+  });
 }
 
 obtenerZonas();
