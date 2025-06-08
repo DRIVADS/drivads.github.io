@@ -389,349 +389,274 @@
 	
 </main>
 	  
-<script>
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const apiNodos = 'https://smma-aobk.onrender.com/api/nodos';
-    const apiZonas = 'https://smma-aobk.onrender.com/api/zonas';
+	<script>
+	const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+	const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
-    const selectEstado = document.getElementById('estado');
-    const selectMunicipio = document.getElementById('municipio');
-    const selectLocalidad = document.getElementById('localidad');
-    const form = document.querySelector('form');
+	const selectEstado = document.getElementById('estado');
+	const selectMunicipio = document.getElementById('municipio');
+	const selectLocalidad = document.getElementById('localidad');
+	const form = document.querySelector('form');
+	const alertContainer = document.getElementById('alertContainer');
 
-    let zonasDisponibles = [];
+	let zonasDisponibles = [];
 
-    function llenarSelect(select, items) {
-      select.innerHTML = '<option value="">Seleccionar...</option>';
-      [...new Set(items)].forEach(item => {
-        const option = document.createElement('option');
-        option.value = item;
-        option.textContent = item;
-        select.appendChild(option);
-      });
-    }
+	// ========== UTILIDADES ==========
+	function llenarSelect(select, items) {
+	  select.innerHTML = '<option value="">Seleccionar...</option>';
+	  [...new Set(items)].forEach(item => {
+		const option = document.createElement('option');
+		option.value = item;
+		option.textContent = item;
+		select.appendChild(option);
+	  });
+	}
 
-    async function obtenerZonas() {
-      const res = await fetch(proxyUrl + apiZonas);
-      if (!res.ok) throw new Error('Error al obtener zonas');
-      const data = await res.json();
-      zonasDisponibles = data;
+	function mostrarAlerta(mensaje, tipo = 'info') {
+	  const alertId = `alert-${Date.now()}`;
+	  const alertHTML = `
+		<div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+		  ${mensaje}
+		  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+		</div>
+	  `;
+	  alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+	  setTimeout(() => {
+		const alertEl = document.getElementById(alertId);
+		if (alertEl) alertEl.remove();
+	  }, 4000);
+	}
 
-      const estados = zonasDisponibles.map(z => z.estado);
-      llenarSelect(selectEstado, estados);
-    }
+	// ========== ZONAS ==========
+	async function obtenerZonas() {
+	  try {
+		const res = await fetch(`${apiBase}/api/zonas`);
+		if (!res.ok) throw new Error('Error al obtener zonas');
+		zonasDisponibles = await res.json();
+		const estados = zonasDisponibles.map(z => z.estado);
+		llenarSelect(selectEstado, estados);
+	  } catch (error) {
+		mostrarAlerta('Error al cargar zonas.', 'danger');
+		console.error(error);
+	  }
+	}
 
-    async function obtenerDatos(filtro = {}) {
-      try {
-        const [resNodos] = await Promise.all([
-          fetch(proxyUrl + apiNodos)
-        ]);
+	// ========== NODOS ==========
+	async function obtenerDatos(filtro = {}) {
+	  try {
+		const resNodos = await fetch(`${apiBase}/api/nodos`);
+		if (!resNodos.ok) throw new Error('Error al obtener nodos');
+		const nodos = await resNodos.json();
+		const tbody = document.getElementById('tabla-cuerpo');
+		tbody.innerHTML = '';
 
-        if (!resNodos.ok) throw new Error('Error al obtener nodos');
-        const nodos = await resNodos.json();
-        const tbody = document.getElementById('tabla-cuerpo');
-        tbody.innerHTML = '';
+		const mapaZonas = new Map(zonasDisponibles.map(z => [z.id_zona || z._id, z]));
 
-        const mapaZonas = new Map();
-        zonasDisponibles.forEach(zona => {
-          mapaZonas.set(zona.id_zona || zona._id, zona);
-        });
+		const nodosFiltrados = nodos.filter(nodo => {
+		  const zona = mapaZonas.get(nodo.id_zona) || {};
+		  return (!filtro.estado || zona.estado === filtro.estado) &&
+				 (!filtro.municipio || zona.municipio === filtro.municipio) &&
+				 (!filtro.localidad || zona.localidad === filtro.localidad);
+		});
 
-        const nodosFiltrados = nodos.filter(nodo => {
-          const zona = mapaZonas.get(nodo.id_zona) || {};
-          return (!filtro.estado || zona.estado === filtro.estado) &&
-                 (!filtro.municipio || zona.municipio === filtro.municipio) &&
-                 (!filtro.localidad || zona.localidad === filtro.localidad);
-        });
+		nodosFiltrados.forEach(nodo => {
+		  const zona = mapaZonas.get(nodo.id_zona) || {};
+		  const sensoresNombres = (nodo.sensores || [])
+			.map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
+			.join(' ');
 
-        nodosFiltrados.forEach(nodo => {
-          const zona = mapaZonas.get(nodo.id_zona) || {};
+		  const tr = document.createElement('tr');
+		  tr.innerHTML = `
+			<td>${nodo.nombre || ''}</td>
+			<td>${nodo.cordenadas || ''}</td>
+			<td>${nodo.fecha_imp || ''}</td>
+			<td>${nodo.mac || ''}</td>
+			<td>${sensoresNombres}</td>
+			<td>${zona.localidad || ''}</td>
+			<td>${zona.municipio || ''}</td>
+			<td>${zona.estado || ''}</td>
+			<td>${zona.codigoPostal || ''}</td>
+			<td>
+			  <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarNodo('${nodo.id_nodo}')">Eliminar</button>
+			  <button class="btn btn-info btn-sm col-12" onclick="modificarNodo('${nodo.id_nodo}')">Modificar</button>
+			</td>
+		  `;
+		  tbody.appendChild(tr);
+		});
+	  } catch (error) {
+		mostrarAlerta('Error al obtener datos.', 'danger');
+		console.error(error);
+	  }
+	}
 
-          const sensoresNombres = (nodo.sensores || [])
-            .map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
-            .join(' ');
+	async function eliminarNodo(id) {
+	  if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
+	  try {
+		const res = await fetch(`${apiBase}/api/nodos/${id}`, { method: 'DELETE' });
+		if (res.ok) {
+		  mostrarAlerta('Nodo eliminado exitosamente.', 'success');
+		  obtenerDatos();
+		} else {
+		  throw new Error();
+		}
+	  } catch (error) {
+		mostrarAlerta('Error al eliminar nodo.', 'danger');
+		console.error(error);
+	  }
+	}
 
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${nodo.nombre || ''}</td>
-            <td>${nodo.cordenadas || ''}</td>
-            <td>${nodo.fecha_imp || ''}</td>
-            <td>${nodo.mac || ''}</td>
-            <td>${sensoresNombres}</td>
-            <td>${zona.localidad || ''}</td>
-            <td>${zona.municipio || ''}</td>
-            <td>${zona.estado || ''}</td>
-            <td>${zona.codigoPostal || ''}</td>
-            <td>
-              <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarNodo('${nodo.id_nodo}')">Eliminar</button>
-              <button class="btn btn-info btn-sm col-12" onclick="modificarNodo('${nodo.id_nodo}')">Modificar</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+	// ========== MODIFICAR NODO ==========
+	async function cargarZonasModal() {
+	  const selectZona = document.getElementById("zonaNodoM");
+	  selectZona.innerHTML = '<option value="">Selecciona una zona...</option>';
+	  zonasDisponibles.forEach(zona => {
+		const option = document.createElement("option");
+		option.value = zona.id_zona;
+		option.textContent = `${zona.localidad}, ${zona.municipio}, ${zona.estado}, ${zona.pais}`;
+		selectZona.appendChild(option);
+	  });
+	}
 
-      } catch (error) {
-        console.error('Error al obtener datos:', error);
-        alert('Error al obtener datos. Revisa consola.');
-      }
-    }
+	async function modificarNodo(id_nodo) {
+	  try {
+		await cargarZonasModal();
+		const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`);
+		if (!res.ok) throw new Error('Nodo no encontrado');
+		const nodo = await res.json();
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const filtro = {
-        estado: selectEstado.value || null,
-        municipio: selectMunicipio.value || null,
-        localidad: selectLocalidad.value || null
-      };
-      obtenerDatos(filtro);
-    });
+		document.getElementById("idNodoM").value = nodo.id_nodo;
+		document.getElementById("nombreNodoM").value = nodo.nombre;
+		document.getElementById("zonaNodoM").value = nodo.id_zona;
+		document.getElementById("fechaInstalacionM").value = nodo.fecha_imp;
+		document.getElementById("ipMacM").value = nodo.mac;
+		document.getElementById("coordenadasM").value = nodo.cordenadas;
 
-    async function eliminarNodo(id) {
-      if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
-      try {
-        const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/nodos/${id}`, {
-          method: 'DELETE'
-        });
-        if (res.ok) {
-          alert('Nodo eliminado exitosamente');
-          obtenerDatos();
-        } else {
-          alert('Error al eliminar nodo');
-        }
-      } catch (error) {
-        alert('Error al eliminar nodo. Revisa consola.');
-        console.error(error);
-      }
-    }
+		const resSensores = await fetch(`${apiBase}/api/SENSORS`);
+		if (!resSensores.ok) throw new Error('No se pudieron cargar sensores');
+		const sensoresDisponibles = await resSensores.json();
 
-    function modificarNodo(id) {
-      alert('Función modificar nodo para id: ' + id);
-    }
+		const container = document.getElementById("sensorContainerM");
+		container.innerHTML = '';
 
-    // Eventos en cascada
-    selectEstado.addEventListener('change', () => {
-      const estadoSel = selectEstado.value;
-      const municipios = zonasDisponibles
-        .filter(z => z.estado === estadoSel)
-        .map(z => z.municipio);
-      llenarSelect(selectMunicipio, municipios);
+		(nodo.sensores.length ? nodo.sensores : [null]).forEach(sensor =>
+		  container.appendChild(crearSensorSelect(sensoresDisponibles, sensor))
+		);
 
-      selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-    });
+		const modal = new bootstrap.Modal(document.getElementById('modalModificarNodo'));
+		modal.show();
+	  } catch (error) {
+		mostrarAlerta('Error al cargar el nodo o sensores.', 'danger');
+		console.error(error);
+	  }
+	}
 
-    selectMunicipio.addEventListener('change', () => {
-      const estadoSel = selectEstado.value;
-      const municipioSel = selectMunicipio.value;
-      const localidades = zonasDisponibles
-        .filter(z => z.estado === estadoSel && z.municipio === municipioSel)
-        .map(z => z.localidad);
-      llenarSelect(selectLocalidad, localidades);
-    });
+	function crearSensorSelect(sensoresDisponibles, sensorSeleccionado) {
+	  const div = document.createElement("div");
+	  div.classList.add("row", "g-3", "sensor-entry");
 
-    // Inicial
-    obtenerZonas().then(() => obtenerDatos());
-  </script>
+	  const selectHTML = `
+		<div class="col-md-10">
+		  <label class="form-label">Seleccionar Sensor</label>
+		  <select class="form-select sensor-select" required>
+			<option value="">Selecciona un sensor...</option>
+			${sensoresDisponibles.map(sensor =>
+			  `<option value='${JSON.stringify(sensor)}' ${sensorSeleccionado && sensor.id_sensor === sensorSeleccionado.id_sensor ? "selected" : ""}>
+				${sensor.nombre} (${sensor.tipo_dato})
+			  </option>`
+			).join('')}
+		  </select>
+		  <div class="invalid-feedback">Selecciona un sensor válido.</div>
+		</div>
+		<div class="col-md-2 d-flex align-items-end">
+		  <button type="button" class="btn btn-danger remove-sensor">−</button>
+		</div>
+	  `;
+	  div.innerHTML = selectHTML;
+	  div.querySelector(".remove-sensor").addEventListener("click", () => div.remove());
+	  return div;
+	}
 
-<script>
-  const apiBase = 'https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com';
+	document.getElementById("addSensorM").addEventListener("click", async () => {
+	  try {
+		const res = await fetch(`${apiBase}/api/SENSORS`);
+		const sensoresDisponibles = await res.json();
+		const container = document.getElementById("sensorContainerM");
+		container.appendChild(crearSensorSelect(sensoresDisponibles, null));
+	  } catch (error) {
+		mostrarAlerta('Error al cargar sensores para agregar.', 'danger');
+		console.error(error);
+	  }
+	});
 
-// Mostrar alertas tipo Bootstrap
-function mostrarAlerta(mensaje, tipo = 'info') {
-  const alertId = `alert-${Date.now()}`;
-  const alertHTML = `
-    <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-      ${mensaje}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-  `;
+	async function guardarCambiosNodo() {
+	  const form = document.getElementById("formModificarNodo");
+	  if (!form.checkValidity()) {
+		form.classList.add('was-validated');
+		mostrarAlerta('Por favor completa todos los campos.', 'danger');
+		return;
+	  }
 
-  const container = document.getElementById('alertContainer');
-  container.insertAdjacentHTML('beforeend', alertHTML);
+	  const id_nodo = document.getElementById("idNodoM").value;
+	  const sensores = [...document.querySelectorAll("#sensorContainerM select.sensor-select")].map(s => {
+		if (!s.value) throw new Error('Sensor no seleccionado');
+		return JSON.parse(s.value);
+	  });
 
-  setTimeout(() => {
-    const alertEl = document.getElementById(alertId);
-    if (alertEl) alertEl.remove();
-  }, 4000);
-}
+	  const nodoActualizado = {
+		nombre: document.getElementById("nombreNodoM").value.trim(),
+		id_zona: document.getElementById("zonaNodoM").value,
+		fecha_imp: document.getElementById("fechaInstalacionM").value,
+		mac: document.getElementById("ipMacM").value.trim(),
+		cordenadas: document.getElementById("coordenadasM").value.trim(),
+		sensores
+	  };
 
-// Cargar zonas en modal de modificar nodo
-async function cargarZonasModal() {
-  try {
-    const res = await fetch(`${apiBase}/api/zonas`);
-    if (!res.ok) throw new Error('No se pudieron cargar las zonas');
-    const zonas = await res.json();
+	  try {
+		const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`, {
+		  method: 'PUT',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify(nodoActualizado)
+		});
+		if (!res.ok) throw new Error();
 
-    const selectZona = document.getElementById("zonaNodoM");
-    selectZona.innerHTML = '<option value="">Selecciona una zona...</option>';
+		bootstrap.Modal.getInstance(document.getElementById('modalModificarNodo')).hide();
+		mostrarAlerta('Nodo actualizado correctamente.', 'success');
+		obtenerDatos();
+	  } catch (error) {
+		mostrarAlerta('Error al guardar cambios.', 'danger');
+		console.error(error);
+	  }
+	}
 
-    zonas.forEach(zona => {
-      const option = document.createElement("option");
-      option.value = zona.id_zona;
-      option.textContent = `${zona.localidad}, ${zona.municipio}, ${zona.estado}, ${zona.pais}`;
-      selectZona.appendChild(option);
-    });
-  } catch (error) {
-    mostrarAlerta('Error al cargar zonas.', 'danger');
-    console.error(error);
-  }
-}
+	// ========== EVENTOS ==========
+	form.addEventListener('submit', e => {
+	  e.preventDefault();
+	  obtenerDatos({
+		estado: selectEstado.value || null,
+		municipio: selectMunicipio.value || null,
+		localidad: selectLocalidad.value || null
+	  });
+	});
 
-// Función para abrir modal y cargar datos de nodo
-async function modificarNodo(id_nodo) {
-  try {
-    // Cargar zonas en select (para que esté disponible al abrir)
-    await cargarZonasModal();
+	selectEstado.addEventListener('change', () => {
+	  const municipios = zonasDisponibles
+		.filter(z => z.estado === selectEstado.value)
+		.map(z => z.municipio);
+	  llenarSelect(selectMunicipio, municipios);
+	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+	});
 
-    // Obtener nodo
-    const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`);
-    if (!res.ok) throw new Error('Nodo no encontrado');
-    const nodo = await res.json();
+	selectMunicipio.addEventListener('change', () => {
+	  const localidades = zonasDisponibles
+		.filter(z => z.estado === selectEstado.value && z.municipio === selectMunicipio.value)
+		.map(z => z.localidad);
+	  llenarSelect(selectLocalidad, localidades);
+	});
 
-    // Rellenar inputs
-    document.getElementById("idNodoM").value = nodo.id_nodo;
-    document.getElementById("nombreNodoM").value = nodo.nombre;
-    document.getElementById("zonaNodoM").value = nodo.id_zona;
-    document.getElementById("fechaInstalacionM").value = nodo.fecha_imp;
-    document.getElementById("ipMacM").value = nodo.mac;
-    document.getElementById("coordenadasM").value = nodo.cordenadas;
-
-    // Cargar sensores disponibles
-    const resSensores = await fetch(`${apiBase}/api/SENSORS`);
-    if (!resSensores.ok) throw new Error('No se pudieron cargar sensores');
-    const sensoresDisponibles = await resSensores.json();
-
-    const sensorContainer = document.getElementById("sensorContainerM");
-    sensorContainer.innerHTML = ''; // limpiar
-
-    // Agregar un select para cada sensor del nodo, seleccionando el sensor correcto
-    nodo.sensores.forEach(sensorNodo => {
-      sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, sensorNodo));
-    });
-
-    // Si el nodo no tiene sensores, agregar al menos uno vacío para que se pueda elegir
-    if (nodo.sensores.length === 0) {
-      sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, null));
-    }
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('modalModificarNodo'));
-    modal.show();
-
-  } catch (error) {
-    mostrarAlerta('Error al cargar el nodo o sensores.', 'danger');
-    console.error(error);
-  }
-}
-
-// Función para crear el div con select de sensores, con opción seleccionada si aplica
-function crearSensorSelect(sensoresDisponibles, sensorSeleccionado) {
-  const div = document.createElement("div");
-  div.classList.add("row", "g-3", "sensor-entry");
-
-  const selectHTML = `
-    <div class="col-md-10">
-      <label class="form-label">Seleccionar Sensor</label>
-      <select class="form-select sensor-select" required>
-        <option value="">Selecciona un sensor...</option>
-        ${sensoresDisponibles.map(sensor =>
-          `<option value='${JSON.stringify(sensor)}' ${sensorSeleccionado && sensor.id_sensor === sensorSeleccionado.id_sensor ? "selected" : ""}>
-            ${sensor.nombre} (${sensor.tipo_dato})
-          </option>`
-        ).join('')}
-      </select>
-      <div class="invalid-feedback">Selecciona un sensor válido.</div>
-    </div>
-    <div class="col-md-2 d-flex align-items-end">
-      <button type="button" class="btn btn-danger remove-sensor">−</button>
-    </div>
-  `;
-
-  div.innerHTML = selectHTML;
-
-  // Agregar evento eliminar sensor
-  div.querySelector(".remove-sensor").addEventListener("click", () => {
-    div.remove();
-  });
-
-  return div;
-}
-
-// Botón para agregar sensor nuevo en modal
-document.getElementById("addSensorM").addEventListener("click", async () => {
-  try {
-    const resSensores = await fetch(`${apiBase}/api/SENSORS`);
-    if (!resSensores.ok) throw new Error('No se pudieron cargar sensores');
-    const sensoresDisponibles = await resSensores.json();
-
-    const sensorContainer = document.getElementById("sensorContainerM");
-    sensorContainer.appendChild(crearSensorSelect(sensoresDisponibles, null));
-  } catch (error) {
-    mostrarAlerta('Error al cargar sensores para agregar.', 'danger');
-    console.error(error);
-  }
-});
-
-// Guardar cambios del nodo
-async function guardarCambiosNodo() {
-  const form = document.getElementById("formModificarNodo");
-  if (!form.checkValidity()) {
-    form.classList.add('was-validated');
-    mostrarAlerta('Por favor completa todos los campos correctamente.', 'danger');
-    return;
-  }
-
-  const id_nodo = document.getElementById("idNodoM").value;
-  const nombre = document.getElementById("nombreNodoM").value.trim();
-  const id_zona = document.getElementById("zonaNodoM").value;
-  const fecha_imp = document.getElementById("fechaInstalacionM").value;
-  const mac = document.getElementById("ipMacM").value.trim();
-  const coordenadas = document.getElementById("coordenadasM").value.trim();
-
-  // Obtener sensores seleccionados
-  const selects = document.querySelectorAll("#sensorContainerM select.sensor-select");
-  const sensoresSeleccionados = [];
-  for (const select of selects) {
-    if (!select.value) {
-      mostrarAlerta('Todos los sensores deben ser seleccionados.', 'danger');
-      return;
-    }
-    sensoresSeleccionados.push(JSON.parse(select.value));
-  }
-
-  // Construir objeto para enviar
-  const nodoActualizado = {
-    nombre,
-    id_zona,
-    fecha_imp,
-    mac,
-    cordenadas: coordenadas,
-    sensores: sensoresSeleccionados
-  };
-
-  try {
-    const res = await fetch(`${apiBase}/api/nodos/${id_nodo}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nodoActualizado)
-    });
-
-    if (!res.ok) throw new Error('Error al actualizar nodo');
-
-    // Cerrar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarNodo'));
-    modal.hide();
-
-    mostrarAlerta('Nodo actualizado correctamente.', 'success');
-
-    // Aquí deberías recargar la tabla o datos para reflejar cambios
-    if (typeof obtenerNodos === 'function') obtenerNodos();
-
-  } catch (error) {
-    console.error(error);
-    mostrarAlerta('No se pudieron guardar los cambios del nodo.', 'danger');
-  }
-}
+	// ========== INICIO ==========
+	obtenerZonas().then(obtenerDatos);
 </script>
+
 
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
