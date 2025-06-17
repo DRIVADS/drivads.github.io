@@ -350,17 +350,20 @@
 </div>
 
 <script>
-  const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-  const apiSensores = "https://smma-aobk.onrender.com/api/sensors";
+  const proxy = "https://cors-anywhere.herokuapp.com/";
+  const apiBase = "https://smma-aobk.onrender.com/api/sensors";
   let sensoresData = [];
+
+  // Función genérica para llamadas a la API
+  async function apiRequest(url, options = {}) {
+    const response = await fetch(proxy + url, options);
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+    return await response.json().catch(() => ({}));
+  }
 
   async function obtenerSensores() {
     try {
-      const response = await fetch(proxyUrl + apiSensores);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      sensoresData = await response.json();
-
+      sensoresData = await apiRequest(apiBase);
       llenarFiltros(sensoresData);
       mostrarSensores(sensoresData);
     } catch (error) {
@@ -370,159 +373,110 @@
   }
 
   function llenarFiltros(sensores) {
-    const tipoDatoSet = new Set();
-    const tipoSet = new Set();
-
-    sensores.forEach(sensor => {
-      if (sensor.tipo_dato) tipoDatoSet.add(sensor.tipo_dato);
-      if (sensor.analogico_digital) tipoSet.add(sensor.analogico_digital);
-    });
-
     const tipoDatoSelect = document.getElementById('tipoDato');
     const tipoSensorSelect = document.getElementById('tipoSensor');
+    const tiposDato = [...new Set(sensores.map(s => s.tipo_dato).filter(Boolean))];
+    const tiposSensor = [...new Set(sensores.map(s => s.analogico_digital).filter(Boolean))];
 
-    tipoDatoSet.forEach(tipo => {
-      tipoDatoSelect.insertAdjacentHTML('beforeend', `<option value="${tipo}">${tipo}</option>`);
-    });
+    llenarSelect(tipoDatoSelect, tiposDato);
+    llenarSelect(tipoSensorSelect, tiposSensor);
+  }
 
-    tipoSet.forEach(tipo => {
-      tipoSensorSelect.insertAdjacentHTML('beforeend', `<option value="${tipo}">${tipo}</option>`);
+  function llenarSelect(selectElement, options) {
+    selectElement.innerHTML = '<option value="">Todos</option>';
+    options.forEach(value => {
+      selectElement.insertAdjacentHTML('beforeend', `<option value="${value}">${value}</option>`);
     });
   }
 
   function mostrarSensores(sensores) {
     const tbody = document.getElementById('sensoresBody');
-    tbody.innerHTML = '';
-
-    sensores.forEach(sensor => {
-      const fila = `
-        <tr>
-          <td>${sensor.nombre || 'N/A'}</td>
-          <td>${sensor.tipo_dato || 'N/A'}</td>
-          <td>${sensor.analogico_digital || 'N/A'}</td>
-          <td>${sensor.id_sensor || 'N/A'}</td>
-          <td>
-            <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarSensor('${sensor.id_sensor}')">Eliminar</button>
-            <button class="btn btn-info btn-sm col-lg-12"
-			  onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">
-			  Modificar
-			</button>
-          </td>
-        </tr>`;
-      tbody.insertAdjacentHTML('beforeend', fila);
-    });
+    tbody.innerHTML = sensores.map(sensor => `
+      <tr>
+        <td>${sensor.nombre || 'N/A'}</td>
+        <td>${sensor.tipo_dato || 'N/A'}</td>
+        <td>${sensor.analogico_digital || 'N/A'}</td>
+        <td>${sensor.id_sensor || 'N/A'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarSensor('${sensor.id_sensor}')">Eliminar</button>
+          <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
+        </td>
+      </tr>
+    `).join('');
   }
 
   function filtrarSensores() {
     const tipoDato = document.getElementById('tipoDato').value;
     const tipoSensor = document.getElementById('tipoSensor').value;
 
-    const filtrados = sensoresData.filter(sensor => {
-      return (!tipoDato || sensor.tipo_dato === tipoDato) &&
-             (!tipoSensor || sensor.analogico_digital === tipoSensor);
-    });
+    const filtrados = sensoresData.filter(sensor =>
+      (!tipoDato || sensor.tipo_dato === tipoDato) &&
+      (!tipoSensor || sensor.analogico_digital === tipoSensor)
+    );
 
     mostrarSensores(filtrados);
   }
 
-  document.getElementById('tipoDato').addEventListener('change', filtrarSensores);
-  document.getElementById('tipoSensor').addEventListener('change', filtrarSensores);
-
-  async function eliminarSensor(id_sensor) {
-	  if (!confirm('¿Estás seguro de eliminar este sensor?')) return;
-	  try {
-		const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/sensors/${id_sensor}`, {
-		  method: 'DELETE'
-		});
-		if (res.ok) {
-		  alert('Sensor eliminado exitosamente');
-		  obtenerSensores(); // Asegúrate de tener esta función para recargar la tabla de sensores
-		} else {
-		  alert('Error al eliminar sensor');
-		}
-	  } catch (error) {
-		alert('Error al eliminar sensor. Revisa consola.');
-		console.error(error);
-	  }
-	}
-
-
-	function modificarSensor(id, tipo, nombre, dato) {
-    document.getElementById("sensorIdM").value = id;
-		
-    const tipoNormalizado = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-	document.getElementById("tipoSensorM").value = tipoNormalizado;
-		
-    document.getElementById("nombreSensorM").value = nombre;
-    document.getElementById("tipoDatoM").value = dato;
-
-    const modal = new bootstrap.Modal(document.getElementById('modalModificar'));
-    modal.show();
+  async function eliminarSensor(id) {
+    if (!confirm('¿Estás seguro de eliminar este sensor?')) return;
+    try {
+      await apiRequest(`${apiBase}/${id}`, { method: 'DELETE' });
+      mostrarAlerta('Sensor eliminado exitosamente.', 'success');
+      obtenerSensores();
+    } catch (error) {
+      console.error(error);
+      mostrarAlerta('Error al eliminar el sensor.', 'danger');
+    }
   }
 
-  function guardarCambios() {
-	  const id = document.getElementById("sensorIdM").value;
-	  const tipo = document.getElementById("tipoSensorM").value.toLowerCase();
-	  const nombre = document.getElementById("nombreSensorM").value.trim();
-	  const dato = document.getElementById("tipoDatoM").value.trim();
+  function modificarSensor(id, tipo, nombre, dato) {
+    document.getElementById("sensorIdM").value = id;
+    document.getElementById("tipoSensorM").value = tipo?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || "";
+    document.getElementById("nombreSensorM").value = nombre || "";
+    document.getElementById("tipoDatoM").value = dato || "";
 
-	  // Validación simple
-	  if (!nombre || !tipo || !dato) {
-		mostrarAlerta('Por favor completa todos los campos.', 'danger');
-		return;
-	  }
+    new bootstrap.Modal(document.getElementById('modalModificar')).show();
+  }
 
-	  const sensorActualizado = {
-		analogico_digital: tipo,
-		nombre: nombre,
-		tipo_dato: dato
-	  };
+  async function guardarCambios() {
+    const id = document.getElementById("sensorIdM").value;
+    const tipo = document.getElementById("tipoSensorM").value.trim().toLowerCase();
+    const nombre = document.getElementById("nombreSensorM").value.trim();
+    const dato = document.getElementById("tipoDatoM").value.trim();
 
-	  fetch(`https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/sensors/${id}`, {
-		method: 'PUT',
-		headers: {
-		  'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(sensorActualizado)
-	  })
-	  .then(response => {
-		if (!response.ok) throw new Error('Error al actualizar');
-		return response.json();
-	  })
-	  .then(data => {
-		const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificar'));
-		modal.hide();
+    if (!nombre || !tipo || !dato) {
+      mostrarAlerta('Por favor completa todos los campos.', 'danger');
+      return;
+    }
 
-		mostrarAlerta('Sensor actualizado correctamente.', 'success');
-		obtenerSensores();
-	  })
-	  .catch(error => {
-		console.error('Error al guardar cambios:', error);
-		mostrarAlerta('Error al guardar los cambios.', 'danger');
-	  });
-	}
-
+    try {
+      await apiRequest(`${apiBase}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analogico_digital: tipo, nombre, tipo_dato: dato })
+      });
+      bootstrap.Modal.getInstance(document.getElementById('modalModificar')).hide();
+      mostrarAlerta('Sensor actualizado correctamente.', 'success');
+      obtenerSensores();
+    } catch (error) {
+      console.error('Error al guardar cambios:', error);
+      mostrarAlerta('Error al guardar los cambios.', 'danger');
+    }
+  }
 
   function mostrarAlerta(mensaje, tipo = 'info') {
-	  const alertId = `alert-${Date.now()}`;
-	  const alertHTML = `
-		<div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-		  ${mensaje}
-		  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-		</div>
-	  `;
+    const id = `alert-${Date.now()}`;
+    document.getElementById('alertContainer').insertAdjacentHTML('beforeend', `
+      <div id="${id}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    `);
+    setTimeout(() => document.getElementById(id)?.remove(), 4000);
+  }
 
-	  const container = document.getElementById('alertContainer');
-	  container.insertAdjacentHTML('beforeend', alertHTML);
-
-	  // Eliminar automáticamente después de 4 segundos
-	  setTimeout(() => {
-		const alertEl = document.getElementById(alertId);
-		if (alertEl) alertEl.remove();
-	  }, 4000);
- }
-
-
+  document.getElementById('tipoDato').addEventListener('change', filtrarSensores);
+  document.getElementById('tipoSensor').addEventListener('change', filtrarSensores);
 
   obtenerSensores();
 </script>
