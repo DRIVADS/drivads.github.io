@@ -309,18 +309,16 @@
 	  							
 </main>
 <script>
-  const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-  const apiUrl = "https://smma-aobk.onrender.com/api/usuarios";
+  const proxy = "https://cors-anywhere.herokuapp.com/";
+  const apiUsuarios = "https://smma-aobk.onrender.com/api/usuarios";
   let usuariosData = [];
 
+  // Función genérica para obtener datos desde la API
   async function obtenerUsuarios() {
     try {
-      const response = await fetch(proxyUrl + apiUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      usuariosData = await response.json();
+      const res = await fetch(proxy + apiUsuarios);
+      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+      usuariosData = await res.json();
       mostrarUsuarios(usuariosData);
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
@@ -328,60 +326,61 @@
     }
   }
 
+  // Mostrar lista de usuarios
   function mostrarUsuarios(lista) {
-  const tbody = document.getElementById('usuariosBody');
-  tbody.innerHTML = '';
-
-  lista.forEach(usuario => {
-    const nombreCompleto = `${usuario.nombre || ''} ${usuario.apellido_pa || ''} ${usuario.apellido_ma || ''}`.trim();
-
-    const fila = `
-      <tr>
-        <td>${nombreCompleto}</td>
-        <td>${usuario.fechaNacimiento || 'N/A'}</td>
-        <td>${usuario.Rol || 'N/A'}</td>
-        <td>${usuario.correo || 'N/A'}</td>
-        <td>${usuario.institucion || 'N/A'}</td>
-        <td>${usuario.cargo || 'N/A'}</td>
-        <td>${usuario.matricula || 'N/A'}</td>
-        <td>
-          <button class="btn btn-danger btn-sm col-lg-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
-          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
-        </td>
-      </tr>`;
-    tbody.insertAdjacentHTML('beforeend', fila);
-  });
-}
-
-  function normalizarTexto(texto) {
-    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const tbody = document.getElementById('usuariosBody');
+    tbody.innerHTML = lista.map(usuario => {
+      const nombre = `${usuario.nombre || ''} ${usuario.apellido_pa || ''} ${usuario.apellido_ma || ''}`.trim();
+      return `
+        <tr>
+          <td>${nombre}</td>
+          <td>${usuario.fechaNacimiento || 'N/A'}</td>
+          <td>${usuario.Rol || 'N/A'}</td>
+          <td>${usuario.correo || 'N/A'}</td>
+          <td>${usuario.institucion || 'N/A'}</td>
+          <td>${usuario.cargo || 'N/A'}</td>
+          <td>${usuario.matricula || 'N/A'}</td>
+          <td>
+            <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
+            <button class="btn btn-info btn-sm col-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
-  function filtrarUsuariosPorNombre(valorBuscado) {
-    const texto = normalizarTexto(valorBuscado);
+  // Normalizar texto para búsqueda
+  const normalizar = txt => txt?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() || "";
 
-    const filtrados = usuariosData.filter(usuario => {
-      const nombreCompleto = `${usuario.nombre || ''} ${usuario.apellido_pa || ''} ${usuario.apellido_ma || ''}`;
-      return normalizarTexto(nombreCompleto).includes(texto);
+  // Filtrar por nombre completo
+  function filtrarUsuariosPorNombre(valor) {
+    const texto = normalizar(valor);
+    const filtrados = usuariosData.filter(u => {
+      const nombreCompleto = `${u.nombre || ''} ${u.apellido_pa || ''} ${u.apellido_ma || ''}`;
+      return normalizar(nombreCompleto).includes(texto);
     });
-
     mostrarUsuarios(filtrados);
   }
 
+  // Placeholder para eliminar
   function eliminarUsuario(matricula) {
     alert(`Eliminar usuario con matrícula: ${matricula}`);
   }
 
+  // Placeholder para modificar
   function modificarUsuario(matricula) {
     alert(`Modificar usuario con matrícula: ${matricula}`);
   }
 
-  document.getElementById('nombre').addEventListener('input', (e) => {
+  // Evento del input
+  document.getElementById('nombre').addEventListener('input', e => {
     filtrarUsuariosPorNombre(e.target.value);
   });
 
+  // Inicialización
   obtenerUsuarios();
 </script>
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
