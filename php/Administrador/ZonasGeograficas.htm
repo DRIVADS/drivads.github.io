@@ -353,187 +353,163 @@
 	
 </main>
 <script>
-const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-const apiUrl = "https://smma-aobk.onrender.com/api/zonas";
-let zonas = [];
+	const proxy = "https://cors-anywhere.herokuapp.com/";
+	const apiBase = "https://smma-aobk.onrender.com/api/zonas";
+	let zonas = [];
 
-async function obtenerZonas() {
-  try {
-    const response = await fetch(proxyUrl + apiUrl);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+	async function obtenerZonas() {
+	  try {
+		const res = await fetch(proxy + apiBase);
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		zonas = await res.json();
+		cargarSelects();
+		mostrarZonas(zonas);
+	  } catch (err) {
+		console.error("Error al obtener zonas:", err);
+		alert("No se pudieron cargar los datos de zonas.");
+	  }
+	}
 
-    zonas = await response.json();
-    cargarSelects();
-    mostrarZonas(zonas);
-  } catch (error) {
-    console.error("Error al obtener zonas:", error);
-    alert("No se pudieron cargar los datos de zonas.");
-  }
-}
+	function cargarSelects() {
+	  const paisSel = document.getElementById("pais");
+	  const estadoSel = document.getElementById("estado");
+	  const municipioSel = document.getElementById("municipio");
+	  const localidadSel = document.getElementById("localidad");
 
-function cargarSelects() {
-  const paisSelect = document.getElementById("pais");
-  const estadoSelect = document.getElementById("estado");
-  const municipioSelect = document.getElementById("municipio");
-  const localidadSelect = document.getElementById("localidad");
+	  const actualizarSelect = (select, valores) => {
+		select.innerHTML = `<option value="">Seleccionar...</option>` +
+		  [...new Set(valores)].map(v => `<option>${v}</option>`).join('');
+	  };
 
-  // Eliminar duplicados y llenar selects
-  const paises = [...new Set(zonas.map(z => z.pais))];
-  paisSelect.innerHTML = `<option value="">Seleccionar...</option>` + paises.map(p => `<option>${p}</option>`).join('');
+	  actualizarSelect(paisSel, zonas.map(z => z.pais));
 
-  paisSelect.addEventListener('change', () => {
-    const estados = [...new Set(zonas.filter(z => z.pais === paisSelect.value).map(z => z.estado))];
-    estadoSelect.innerHTML = `<option value="">Seleccionar...</option>` + estados.map(e => `<option>${e}</option>`).join('');
-    municipioSelect.innerHTML = `<option value="">Seleccionar...</option>`;
-    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>`;
-  });
+	  paisSel.onchange = () => {
+		const estados = zonas.filter(z => z.pais === paisSel.value).map(z => z.estado);
+		actualizarSelect(estadoSel, estados);
+		municipioSel.innerHTML = localidadSel.innerHTML = `<option value="">Seleccionar...</option>`;
+	  };
 
-  estadoSelect.addEventListener('change', () => {
-    const municipios = [...new Set(zonas.filter(z => z.estado === estadoSelect.value).map(z => z.municipio))];
-    municipioSelect.innerHTML = `<option value="">Seleccionar...</option>` + municipios.map(m => `<option>${m}</option>`).join('');
-    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>`;
-  });
+	  estadoSel.onchange = () => {
+		const municipios = zonas.filter(z => z.estado === estadoSel.value).map(z => z.municipio);
+		actualizarSelect(municipioSel, municipios);
+		localidadSel.innerHTML = `<option value="">Seleccionar...</option>`;
+	  };
 
-  municipioSelect.addEventListener('change', () => {
-    const localidades = [...new Set(zonas.filter(z => z.municipio === municipioSelect.value).map(z => z.localidad))];
-    localidadSelect.innerHTML = `<option value="">Seleccionar...</option>` + localidades.map(l => `<option>${l}</option>`).join('');
-  });
-}
+	  municipioSel.onchange = () => {
+		const localidades = zonas.filter(z => z.municipio === municipioSel.value).map(z => z.localidad);
+		actualizarSelect(localidadSel, localidades);
+	  };
+	}
 
-function mostrarZonas(lista) {
-  const tbody = document.getElementById('zonasBody');
-  tbody.innerHTML = '';
-  lista.forEach(zona => {
-    const fila = `
-      <tr>
-        <td>${zona.id_zona || 'N/A'}</td>
-        <td>${zona.localidad || 'N/A'}</td>
-        <td>${zona.municipio || 'N/A'}</td>
-        <td>${zona.estado || 'N/A'}</td>
-        <td>${zona.pais || 'N/A'}</td>
-        <td>${zona.codigoPostal || 'N/A'}</td>
-        <td>
-          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarZona('${zona.id_zona}')">Eliminar</button>
-          <button class="btn btn-info btn-sm col-lg-12" onclick="modificarZona('${zona.id_zona}', '${zona.localidad}', '${zona.municipio}', '${zona.estado}', '${zona.pais}', '${zona.codigoPostal}')">
-  			Modificar</button></td></tr>`;
-    tbody.insertAdjacentHTML('beforeend', fila);
-  });
-}
+	function mostrarZonas(lista) {
+	  const tbody = document.getElementById("zonasBody");
+	  tbody.innerHTML = lista.map(z => `
+		<tr>
+		  <td>${z.id_zona || 'N/A'}</td>
+		  <td>${z.localidad || 'N/A'}</td>
+		  <td>${z.municipio || 'N/A'}</td>
+		  <td>${z.estado || 'N/A'}</td>
+		  <td>${z.pais || 'N/A'}</td>
+		  <td>${z.codigoPostal || 'N/A'}</td>
+		  <td>
+			<button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarZona('${z.id_zona}')">Eliminar</button>
+			<button class="btn btn-info btn-sm col-12" onclick="modificarZona('${z.id_zona}', '${z.localidad}', '${z.municipio}', '${z.estado}', '${z.pais}', '${z.codigoPostal}')">Modificar</button>
+		  </td>
+		</tr>
+	  `).join('');
+	}
 
-document.querySelector("form").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const pais = document.getElementById("pais").value;
-  const estado = document.getElementById("estado").value;
-  const municipio = document.getElementById("municipio").value;
-  const localidad = document.getElementById("localidad").value;
+	document.querySelector("form").addEventListener("submit", e => {
+	  e.preventDefault();
+	  const [pais, estado, municipio, localidad] = ["pais", "estado", "municipio", "localidad"].map(id => document.getElementById(id).value);
 
-  const filtrado = zonas.filter(z => {
-    return (!pais || z.pais === pais) &&
-           (!estado || z.estado === estado) &&
-           (!municipio || z.municipio === municipio) &&
-           (!localidad || z.localidad === localidad);
-  });
+	  const filtrado = zonas.filter(z =>
+		(!pais || z.pais === pais) &&
+		(!estado || z.estado === estado) &&
+		(!municipio || z.municipio === municipio) &&
+		(!localidad || z.localidad === localidad)
+	  );
+	  mostrarZonas(filtrado);
+	});
 
-  mostrarZonas(filtrado);
-});
+	async function eliminarZona(id) {
+	  if (!confirm("¿Eliminar esta zona?")) return;
+	  try {
+		const res = await fetch(proxy + `${apiBase}/${id}`, { method: 'DELETE' });
+		if (res.ok) {
+		  mostrarAlerta("Zona eliminada exitosamente.", "success");
+		  obtenerZonas();
+		} else {
+		  throw new Error("Falló la eliminación");
+		}
+	  } catch (err) {
+		console.error(err);
+		mostrarAlerta("No se pudo eliminar la zona.", "danger");
+	  }
+	}
 
-async function eliminarZona(id_zona) {
-  if (!confirm('¿Estás seguro de eliminar esta zona?')) return;
-  try {
-    const res = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/zonas/${id_zona}`, {
-      method: 'DELETE'
-    });
-    if (res.ok) {
-      alert('Zona eliminada exitosamente');
-      obtenerZonas(); // Asegúrate de tener una función que recargue la tabla de zonas
-    } else {
-      alert('Error al eliminar zona');
-    }
-  } catch (error) {
-    alert('Error al eliminar zona. Revisa consola.');
-    console.error(error);
-  }
-}
+	function modificarZona(id, localidad, municipio, estado, pais, codigoPostal) {
+	  document.getElementById("zonaIdM").value = id;
+	  document.getElementById("localidadZonaM").value = localidad;
+	  document.getElementById("municipioZonaM").value = municipio;
+	  document.getElementById("estadoZonaM").value = estado;
+	  document.getElementById("paisZonaM").value = pais;
+	  document.getElementById("codigoPostalZonaM").value = codigoPostal;
 
-function mostrarAlerta(mensaje, tipo = 'info') {
-  const alertId = `alert-${Date.now()}`;
-  const alertHTML = `
-    <div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-      ${mensaje}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    </div>
-  `;
+	  new bootstrap.Modal(document.getElementById("modalModificarZona")).show();
+	}
 
-  const container = document.getElementById('alertContainer');
-  container.insertAdjacentHTML('beforeend', alertHTML);
+	function guardarCambiosZona() {
+	  const id = document.getElementById("zonaIdM").value;
+	  const zona = {
+		localidad: document.getElementById("localidadZonaM").value.trim(),
+		municipio: document.getElementById("municipioZonaM").value.trim(),
+		estado: document.getElementById("estadoZonaM").value.trim(),
+		pais: document.getElementById("paisZonaM").value.trim(),
+		codigoPostal: document.getElementById("codigoPostalZonaM").value.trim()
+	  };
 
-  setTimeout(() => {
-    const alertEl = document.getElementById(alertId);
-    if (alertEl) alertEl.remove();
-  }, 4000);
-}
+	  if (Object.values(zona).some(v => !v)) {
+		mostrarAlerta("Todos los campos son obligatorios.", "danger");
+		return;
+	  }
 
-// Mostrar modal con datos
-function modificarZona(id, localidad, municipio, estado, pais, codigoPostal) {
-  document.getElementById("zonaIdM").value = id;
-  document.getElementById("localidadZonaM").value = localidad;
-  document.getElementById("municipioZonaM").value = municipio;
-  document.getElementById("estadoZonaM").value = estado;
-  document.getElementById("paisZonaM").value = pais;
-  document.getElementById("codigoPostalZonaM").value = codigoPostal;
+	  fetch(proxy + `${apiBase}/${id}`, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(zona)
+	  })
+		.then(res => {
+		  if (!res.ok) throw new Error("Error al actualizar");
+		  return res.json();
+		})
+		.then(() => {
+		  bootstrap.Modal.getInstance(document.getElementById("modalModificarZona")).hide();
+		  mostrarAlerta("Zona actualizada correctamente.", "success");
+		  obtenerZonas();
+		})
+		.catch(err => {
+		  console.error(err);
+		  mostrarAlerta("Error al guardar cambios de zona.", "danger");
+		});
+	}
 
-  const modal = new bootstrap.Modal(document.getElementById('modalModificarZona'));
-  modal.show();
-}
+	function mostrarAlerta(mensaje, tipo = "info") {
+	  const id = `alert-${Date.now()}`;
+	  const alert = `
+		<div id="${id}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+		  ${mensaje}
+		  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+		</div>
+	  `;
+	  const container = document.getElementById("alertContainer");
+	  container.insertAdjacentHTML("beforeend", alert);
+	  setTimeout(() => document.getElementById(id)?.remove(), 4000);
+	}
 
-// Guardar cambios
-function guardarCambiosZona() {
-  const id = document.getElementById("zonaIdM").value;
-  const localidad = document.getElementById("localidadZonaM").value.trim();
-  const municipio = document.getElementById("municipioZonaM").value.trim();
-  const estado = document.getElementById("estadoZonaM").value.trim();
-  const pais = document.getElementById("paisZonaM").value.trim();
-  const codigoPostal = document.getElementById("codigoPostalZonaM").value.trim();
-
-  if (!localidad || !municipio || !estado || !pais || !codigoPostal) {
-    mostrarAlerta('Todos los campos son obligatorios.', 'danger');
-    return;
-  }
-
-  const zonaActualizada = {
-    localidad,
-    municipio,
-    estado,
-    pais,
-    codigoPostal
-  };
-
-  fetch(`https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/zonas/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(zonaActualizada)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error('Error al actualizar zona');
-    return response.json();
-  })
-  .then(data => {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalModificarZona'));
-    modal.hide();
-
-    mostrarAlerta('Zona actualizada correctamente.', 'success');
-    obtenerZonas(); // Asume que tienes una función para recargar la tabla
-  })
-  .catch(error => {
-    console.error('Error al guardar zona:', error);
-    mostrarAlerta('No se pudieron guardar los cambios de zona.', 'danger');
-  });
-}
-
-obtenerZonas();
+	obtenerZonas();
 </script>
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
 </html>
