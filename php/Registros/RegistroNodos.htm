@@ -320,164 +320,183 @@
 	  </div>
   </main>
 </div>
+<!-- Contenedor para alertas Bootstrap -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 	
 <script>
   const apiBase = 'https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com';
+  let sensoresCache = [];
 
-  async function fetchZonas() {
+  function mostrarAlerta(mensaje, tipo = 'success', tiempo = 3000) {
+    const container = document.getElementById("alertContainer");
+
+    const wrapper = document.createElement("div");
+    wrapper.className = `alert alert-${tipo} alert-dismissible fade show`;
+    wrapper.role = "alert";
+    wrapper.innerHTML = `
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    container.appendChild(wrapper);
+
+    setTimeout(() => {
+      wrapper.classList.remove("show");
+      wrapper.classList.add("hide");
+      setTimeout(() => wrapper.remove(), 300);
+    }, tiempo);
+  }
+
+  async function fetchData(url) {
+    const res = await fetch(`${apiBase}${url}`);
+    if (!res.ok) throw new Error(`Error al acceder a ${url}`);
+    return res.json();
+  }
+
+  function createOption(value, text) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = text;
+    return option;
+  }
+
+  async function loadZonas() {
     try {
-      const res = await fetch(`${apiBase}/api/zonas`);
-      const zonas = await res.json();
+      const zonas = await fetchData('/api/zonas');
       const selectZona = document.getElementById("zonaNodo");
-      selectZona.innerHTML = '<option value="">Selecciona una zona...</option>';
+      selectZona.innerHTML = '';
+      selectZona.appendChild(createOption('', 'Selecciona una zona...'));
+
       zonas.forEach(zona => {
-        const option = document.createElement("option");
-        option.value = zona.id_zona;
-        option.textContent = `${zona.localidad}, ${zona.municipio}, ${zona.estado}, ${zona.pais}`;
-        selectZona.appendChild(option);
+        const texto = `${zona.localidad}, ${zona.municipio}, ${zona.estado}, ${zona.pais}`;
+        selectZona.appendChild(createOption(zona.id_zona, texto));
       });
     } catch (err) {
       console.error("Error al cargar zonas:", err);
-      alert("No se pudieron cargar las zonas.");
+      mostrarAlerta("No se pudieron cargar las zonas.", "danger");
     }
   }
 
-  async function fetchSensores() {
+  function llenarSelectSensores(select) {
+    select.innerHTML = '';
+    select.appendChild(createOption('', 'Selecciona un sensor...'));
+    sensoresCache.forEach(sensor => {
+      const value = JSON.stringify(sensor);
+      const text = `${sensor.nombre} (${sensor.tipo_dato})`;
+      select.appendChild(createOption(value, text));
+    });
+  }
+
+  async function loadSensores() {
     try {
-      const res = await fetch(`${apiBase}/api/SENSORS`);
-      const sensores = await res.json();
-      const selects = document.querySelectorAll(".sensor-select");
-      selects.forEach(select => {
-        select.innerHTML = '<option value="">Selecciona un sensor...</option>';
-        sensores.forEach(sensor => {
-          const option = document.createElement("option");
-          option.value = JSON.stringify(sensor);
-          option.textContent = `${sensor.nombre} (${sensor.tipo_dato})`;
-          select.appendChild(option);
-        });
-      });
+      sensoresCache = await fetchData('/api/SENSORS');
+      document.querySelectorAll(".sensor-select").forEach(llenarSelectSensores);
     } catch (err) {
       console.error("Error al cargar sensores:", err);
-      alert("No se pudieron cargar los sensores.");
+      mostrarAlerta("No se pudieron cargar los sensores.", "danger");
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    fetchZonas();
-    fetchSensores();
+  function agregarSensor() {
+    const container = document.getElementById("sensor-container");
 
-    const sensorContainer = document.getElementById("sensor-container");
-    const addSensorButton = document.getElementById("add-sensor");
+    const div = document.createElement("div");
+    div.className = "row g-3 sensor-entry";
+    div.innerHTML = `
+      <div class="col-md-10">
+        <label class="form-label">Seleccionar Sensor</label>
+        <select class="form-select sensor-select" required>
+          <option value="">Cargando sensores...</option>
+        </select>
+        <div class="invalid-feedback">Selecciona un sensor válido.</div>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="button" class="btn btn-danger remove-sensor">−</button>
+      </div>
+    `;
 
-    addSensorButton.addEventListener("click", async () => {
-      const newSensorEntry = document.createElement("div");
-      newSensorEntry.classList.add("row", "g-3", "sensor-entry");
-      newSensorEntry.innerHTML = `
-        <div class="col-md-10">
-          <label class="form-label">Seleccionar Sensor</label>
-          <select class="form-select sensor-select" required>
-            <option value="">Cargando sensores...</option>
-          </select>
-          <div class="invalid-feedback">Selecciona un sensor válido.</div>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-          <button type="button" class="btn btn-danger remove-sensor">−</button>
-        </div>
-      `;
+    container.appendChild(div);
+    llenarSelectSensores(div.querySelector(".sensor-select"));
+  }
 
-      sensorContainer.appendChild(newSensorEntry);
+  document.addEventListener("DOMContentLoaded", async () => {
+    await loadZonas();
+    await loadSensores();
 
-      newSensorEntry.querySelector(".remove-sensor").addEventListener("click", function () {
-        newSensorEntry.remove();
-      });
+    document.getElementById("add-sensor").addEventListener("click", agregarSensor);
 
-      await fetchSensores();
-    });
-
-    document.querySelectorAll(".remove-sensor").forEach(btn => {
-      btn.addEventListener("click", function () {
-        this.closest(".sensor-entry").remove();
-      });
+    document.getElementById("sensor-container").addEventListener("click", (e) => {
+      if (e.target.classList.contains("remove-sensor")) {
+        e.target.closest(".sensor-entry").remove();
+      }
     });
 
     document.querySelector("form").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const form = e.target;
       const inputs = form.querySelectorAll("input, select");
-      let firstInvalid = null;
       let valid = true;
+      let firstInvalid = null;
 
       inputs.forEach(input => {
         if (!input.checkValidity()) {
-          valid = false;
           input.classList.add("is-invalid");
+          valid = false;
+
           if (!firstInvalid) firstInvalid = input;
         } else {
           input.classList.remove("is-invalid");
         }
       });
 
-      // Validar sensores
       const sensorSelects = form.querySelectorAll(".sensor-select");
-      let sensoresValidos = true;
       sensorSelects.forEach(select => {
         if (!select.value) {
-          sensoresValidos = false;
           select.classList.add("is-invalid");
+          valid = false;
           if (!firstInvalid) firstInvalid = select;
         } else {
           select.classList.remove("is-invalid");
         }
       });
 
-      if (!valid || !sensoresValidos) {
+      if (!valid) {
         if (firstInvalid) firstInvalid.focus();
+        mostrarAlerta("Por favor corrige los campos marcados en rojo.", "warning");
         return;
       }
 
-      // Recopilar datos
-      const nombre = document.getElementById("nombreNodo").value;
-      const id_zona = document.getElementById("zonaNodo").value;
-      const fecha = document.getElementById("fechaInstalacion").value;
-      const mac = document.getElementById("ipMac").value;
-      const coords = document.getElementById("coordenadas").value;
-      const sensores = Array.from(sensorSelects).map(select => JSON.parse(select.value));
-
       const nodoData = {
-        nombre,
-        id_zona,
-        fecha_imp: fecha,
-        cordenadas: coords,
-        mac,
-        sensores
+        nombre: document.getElementById("nombreNodo").value,
+        id_zona: document.getElementById("zonaNodo").value,
+        fecha_imp: document.getElementById("fechaInstalacion").value,
+        cordenadas: document.getElementById("coordenadas").value,
+        mac: document.getElementById("ipMac").value,
+        sensores: Array.from(sensorSelects).map(select => JSON.parse(select.value))
       };
 
       try {
         const res = await fetch(`${apiBase}/api/NODOS`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(nodoData)
         });
 
         if (res.ok) {
-          alert("Nodo registrado con éxito");
+          mostrarAlerta("Nodo registrado con éxito ", "success");
           form.reset();
           form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
         } else {
-          alert("Error al registrar el nodo");
+          mostrarAlerta("Error al registrar el nodo ", "danger");
         }
       } catch (err) {
         console.error("Error al enviar el formulario:", err);
-        alert("Hubo un problema al registrar el nodo.");
+        mostrarAlerta("Hubo un problema al registrar el nodo.", "danger");
       }
     });
   });
 </script>
-	  
-							
+	  							
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
