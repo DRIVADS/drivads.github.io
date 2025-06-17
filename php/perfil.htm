@@ -278,115 +278,76 @@
       <div class="d-grid">
         <button type="button" class="btn btn-outline-secondary">Cambiar contraseña</button>
       </div>
+	  <div class="d-grid mt-2">
+        <button type="button" class="btn btn-outline-danger">Eliminar Cuenta</button>
+      </div>
     </form>
   </div>
 
   <!-- Panel principal: formulario editable -->
   <div class="col-md-7 col-lg-8">
     <h4 class="mb-3">Información del Usuario</h4>
-    <form class="needs-validation" novalidate>
-      <div class="row g-3">
-        <div class="col-sm-6">
-          <label for="firstName" class="form-label">Nombre</label>
-          <input type="text" class="form-control" id="firstName" placeholder="" value="Juan" required>
-          <div class="invalid-feedback">El nombre es requerido.</div>
-        </div>
-
-        <div class="col-sm-6">
-          <label for="lastName" class="form-label">Apellido Materno</label>
-          <input type="text" class="form-control" id="lastName" placeholder="" value="Pérez" required>
-          <div class="invalid-feedback">El apellido es requerido.</div>
-        </div>
-		
-		<div class="col-sm-6">
-          <label for="lastName" class="form-label">Apellido Paterno</label>
-          <input type="text" class="form-control" id="apellido Ma" placeholder="" value="Pérez" required>
-          <div class="invalid-feedback">El apellido es requerido.</div>
-        </div>
-		
-		<div class="col-sm-6">
-          <label for="FechaN" class="form-label">Fecha de nacimiento</label>
-          <input type="date" class="form-control rounded-3" id="fecha" placeholder="Selecciona una fecha">
-        </div>
-		
-		<div class="col-sm-6">
-          <label for="Institución" class="form-label">Instirución de procedencia</label>
-          <select class="form-select" id="Institución" required>
-            <option value="">Seleccionar...</option>
-            <option value="CUCBA">CUCBA - Centro Universitario de Ciencias Biológicas y Agropecuarias</option>
-			<option value="CUCEA">CUCEA - Centro Universitario de Ciencias Económico Administrativas</option>
-			<option value="CUCEI">CUCEI - Centro Universitario de Ciencias Exactas e Ingenierías</option>
-			<option value="CUCS">CUCS - Centro Universitario de Ciencias de la Salud</option>
-			<option value="CUCSH">CUCSH - Centro Universitario de Ciencias Sociales y Humanidades</option>
-			<option value="CUAAD">CUAAD - Centro Universitario de Arte, Arquitectura y Diseño</option>
-			<option value="CUVALLES">CUVALLES - Centro Universitario de los Valles</option>
-			<option value="CUCIÉNEGA">CUCIÉNEGA - Centro Universitario de la Ciénega</option>
-			<option value="CUCOSTA">CUCOSTA - Centro Universitario de la Costa</option>
-			<option value="CUCOSTA SUR">CUCOSTA SUR - Centro Universitario de la Costa Sur</option>
-			<option value="CUSUR">CUSUR - Centro Universitario del Sur</option>
-			<option value="CUNORTE">CUNORTE - Centro Universitario del Norte</option>
-			<option value="CUTONALÁ">CUTONALÁ - Centro Universitario de Tonalá</option>
-			<option value="CUALTOS">CUALTOS - Centro Universitario de los Altos</option>
-			<option value="CUAGU">CUAGU - Centro Universitario de Autlán de Navarro</option>
-			<option value="CUJALISCO">CUJALISCO - Centro Universitario Jalisco</option>
-			<option value="CUZAPOTLAN">CUZAPOTLAN - Centro Universitario de Zapotlán el Grande</option>
-			<option value="CUZAMORA">CUZAMORA - Centro Universitario de Zamora</option>
-			<option value="CUZIHUATENEJO">CUZIHUATENEJO - Centro Universitario de Zihuatanejo</option>
-			<option value="CUZIHUATANEJO SUR">CUZIHUATANEJO SUR - Centro Universitario de Zihuatanejo Sur</option>
-			<option value="CUZIHUATANEJO NORTE">CUZIHUATANEJO NORTE - Centro Universitario de Zihuatanejo Norte</option>
-			<option value="CUZIHUATANEJO ESTE">CUZIHUATANEJO ESTE - Centro Universitario de Zihuatanejo Este</option>
-			<option value="CUZIHUATANEJO OESTE">CUZIHUATANEJO OESTE - Centro Universitario de Zihuatanejo Oeste</option>
-			<option value="CUZIHUATANEJO CENTRO">CUZIHUATANEJO CENTRO - Centro Universitario de Zihuatanejo Centro</option>
-			<option value="CUZIHUATANEJO SUR ESTE">CUZIHUATANEJO SUR ESTE - Centro Universitario de Zihuatanejo Sur Este</option>
-			<option value="CUZIHUATANEJO NORTE ESTE">CUZIHUATANEJO NORTE ESTE - Centro Universitario de Zihuatanejo Norte Este</option>
-			<option value="CUZIHUATANEJO ESTE OESTE">CUZIHUATANEJO ESTE OESTE - Centro Universitario de Zihuatanejo Este Oeste</option>
-			<option value="CUZIHUATANEJO OESTE ESTE">CUZIHUATANEJO OESTE ESTE - Centro Universitario de Zihuatanejo Oeste Este</option>
-			<option value="CUZIHUATANEJO CENTRO ESTE">CUZIHUATANEJO CENTRO ESTE - Centro Universitario de Zihuatanejo Centro Este</option>
-			<option value="CUZIHUATANEJO SUR OESTE">CUZIHUATANEJO SUR OESTE - Centro Universitario de Zihuatanejo Sur Oeste</option>
-			<option value="CUZIHUATANEJO NORTE OESTE">CUZIHUATANEJO NORTE OESTE - Centro Universitario de Zihuatanejo Norte Oeste</option>
-			<option value="CUZIHUATANEJO ESTE OESTE CENTRO">CUZIHUATANEJO ESTE OESTE CENTRO - Centro Universitario de Zihuatanejo Este Oeste Centro</option>
-			<option value="CUZIHUATANEJO OESTE ESTE CENTRO">CUZIHUATANEJO OESTE ESTE CENTRO - Centro Universitario de Zihuatanejo Oeste Este Centro</option>
-			<option value="CUZIHUATANEJO CENTRO ESTE CENTRO">CUZIHUATANEJO CENTRO ESTE CENTRO - Centro Universitario de Zihuatanejo Centro Este Centro</option>
-			<option value="CUZIHUATANEJO SUR ESTE CENTRO">CUZIHUATANEJO SUR ESTE CENTRO - Centro Universitario de Zihuatanejo Sur Este Centro</option>
-			<option value="CUZIHUATANEJO NORTE ESTE CENTRO">CUZIHUATANEJO NORTE ESTE CENTRO - Centro Universitario de Zihuatanejo Norte Este Centro</option>
-			<option value="CUZIHUATANEJO ESTE OESTE CENTRO">CUZIHUATANEJO ESTE OESTE CENTRO - Centro Universitario de Zihuatanejo Este Oeste Centro</option>
-			<option value="CUZIHUATANEJO OESTE ESTE CENTRO">CUZIHUATANEJO OESTE ESTE CENTRO - Centro Universitario de Zihuatanejo Oeste Este Centro</option>
-			<option value="CUZIHUATANEJO CENTRO ESTE CENTRO">CUZIHUATANEJO CENTRO ESTE CENTRO - Centro Universitario de Zihuatanejo Centro Este Centro</option>
-			<option value="CUZIHUATANEJO SUR OESTE CENTRO">CUZIHUATANEJO SUR OESTE CENTRO - Centro Universitario de Zihuatanejo Sur Oeste Centro</option>
-			<option value="CUZIHUATANEJO NORTE OESTE CENTRO">CUZIHUATANEJO NORTE OESTE CENTRO - Centro Universitario de Zihuatanejo Norte Oeste Centro</option>
-			<option value="CUZIHUATANEJO ESTE OESTE CENTRO ESTE">CUZIHUATANEJO ESTE OESTE CENTRO ESTE - Centro Universitario de Zihuatanejo Este Oeste Centro Este</option>
-			<option value="CUZIHUATANEJO OESTE ESTE CENTRO ESTE">CUZIHUATANEJO OESTE ESTE CENTRO ESTE - Centro Universitario de Zihuatanejo Oeste Este Centro Este</option>
-			<option value="CUZIHUATANEJO CENTRO ESTE CENTRO ESTE">CUZIHUATANEJO CENTRO ESTE CENTRO - Centro Universitario de Zihuatanejo Centro Este Centro Este</option>
-			<option value="NoAplica">Otra</option>
-          </select>
-          <div class="invalid-feedback">Selecciona una institución.</div>
-        </div>
-		  
-		<div class="col-sm-6">
-          <label for="Cargo" class="form-label">Cargo en la Institución</label>
-          <select class="form-select" id="Cargo" required>
-			<option value="">Seleccionar...</option>
-			<option value="estudiante">Estudiante</option>
-		    <option value="profesor">Profesor(a)</option>
-		    <option value="investigador">Investigador(a)</option>
-		    <option value="administrativo">Personal administrativo</option>
-		    <option value="mantenimiento">Trabajador de mantenimiento (jardinería, limpieza, etc.)</option>
-		    <option value="otro">Otro</option>
-		  </select>
-          <div class="invalid-feedback">Selecciona una institución.</div>
-        </div>
-
-        <div class="col-12">
-          <label for="email" class="form-label">Correo electrónico</label>
-          <input type="email" class="form-control" id="email" placeholder="usuario@ejemplo.com" value="juan@example.com" required>
-          <div class="invalid-feedback">Ingresa un correo válido.</div>
-        </div>
-
+     <form id="formActualizar" class="needs-validation" novalidate>
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <label for="firstName" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="firstName" required>
+        <div class="invalid-feedback">El nombre es requerido.</div>
       </div>
 
-      <hr class="my-4">
-      <button class="w-100 btn btn-primary btn-lg" type="submit">Guardar cambios</button>
-    </form>
+      <div class="col-sm-6">
+        <label for="apellidoPa" class="form-label">Apellido Paterno</label>
+        <input type="text" class="form-control" id="apellidoPa" required>
+        <div class="invalid-feedback">El apellido es requerido.</div>
+      </div>
+
+      <div class="col-sm-6">
+        <label for="apellidoMa" class="form-label">Apellido Materno</label>
+        <input type="text" class="form-control" id="apellidoMa" required>
+        <div class="invalid-feedback">El apellido es requerido.</div>
+      </div>
+
+      <div class="col-sm-6">
+        <label for="fecha" class="form-label">Fecha de nacimiento</label>
+        <input type="date" class="form-control" id="fecha">
+      </div>
+
+      <div class="col-sm-6">
+        <label for="institucion" class="form-label">Institución de procedencia</label>
+        <select class="form-select" id="institucion" required>
+          <option value="">Seleccionar...</option>
+          <option value="Universidad XYZ">Universidad XYZ</option>
+          <option value="CUCEI">CUCEI</option>
+          <option value="CUCEA">CUCEA</option>
+          <option value="Otra">Otra</option>
+        </select>
+        <div class="invalid-feedback">Selecciona una institución.</div>
+      </div>
+
+      <div class="col-sm-6">
+        <label for="cargo" class="form-label">Cargo en la Institución</label>
+        <select class="form-select" id="cargo" required>
+          <option value="">Seleccionar...</option>
+          <option value="estudiante">Estudiante</option>
+          <option value="profesor">Profesor(a)</option>
+          <option value="investigador">Investigador(a)</option>
+          <option value="administrativo">Administrativo</option>
+          <option value="mantenimiento">Mantenimiento</option>
+          <option value="otro">Otro</option>
+        </select>
+        <div class="invalid-feedback">Selecciona un cargo.</div>
+      </div>
+
+      <div class="col-12">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="email" readonly title="Este campo no se puede editar">
+      </div>
+    </div>
+
+    <hr class="my-4">
+    <button class="w-100 btn btn-primary btn-lg" type="submit">Guardar cambios</button>
+  </form>
+	  
   </div>
 </div>
 
@@ -395,6 +356,92 @@
 </div>
 							
 </main>
+<script>
+    const userId = "v3MydB_KAL";
+    const apiUrl = `https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/usuarios/${userId}`;
+
+    // Formatear fecha a YYYY-MM-DD
+    function formatearFecha(fecha) {
+      if (!fecha.includes('/')) return fecha;
+      const [yyyy, mm, dd] = fecha.split('/');
+      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    }
+
+    // Cargar datos del usuario al iniciar
+    async function cargarUsuario() {
+      try {
+        const respuesta = await fetch(apiUrl);
+        const usuario = await respuesta.json();
+
+        document.getElementById('firstName').value = usuario.nombre || '';
+        document.getElementById('apellidoPa').value = usuario.apellido_pa || '';
+        document.getElementById('apellidoMa').value = usuario.apellido_ma || '';
+        document.getElementById('fecha').value = formatearFecha(usuario.fechaNacimiento || '');
+        document.getElementById('institucion').value = usuario.institucion || '';
+        document.getElementById('cargo').value = usuario.cargo || '';
+        document.getElementById('email').value = usuario.correo || '';
+
+      } catch (error) {
+        console.error("Error al cargar usuario:", error);
+        alert("No se pudieron cargar los datos del usuario.");
+      }
+    }
+
+    // Enviar formulario
+    document.getElementById('formActualizar').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      if (!this.checkValidity()) {
+        this.classList.add('was-validated');
+        return;
+      }
+
+      const datosActualizados = {
+        nombre: document.getElementById('firstName').value,
+        apellido_pa: document.getElementById('apellidoPa').value,
+        apellido_ma: document.getElementById('apellidoMa').value,
+        fechaNacimiento: document.getElementById('fecha').value,
+        institucion: document.getElementById('institucion').value,
+        cargo: document.getElementById('cargo').value,
+        // correo NO se envía
+      };
+
+      try {
+        const respuesta = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datosActualizados)
+        });
+
+        if (!respuesta.ok) throw new Error("No se pudo actualizar");
+
+        alert("Datos actualizados correctamente");
+      } catch (error) {
+        console.error("Error al actualizar:", error);
+        alert("Hubo un error al guardar los datos.");
+      }
+    });
+
+    // Validación Bootstrap
+    (() => {
+      'use strict';
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
+
+    // Ejecutar al cargar
+    window.onload = cargarUsuario;
+  </script>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
 </body>
