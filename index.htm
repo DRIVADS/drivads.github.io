@@ -235,224 +235,237 @@
   <main class="d-flex flex-nowrap">
   
   <!--<div class="col-sm-6 col-lg-12 m-2 row" style="max-height: 600px; overflow-y: auto;">-->
-    <div class="row m-3 mt-2">
-      <div class="col-sm-12 col-lg-12 mb-2">
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Seleccionar NodoIoT</h5>
-      <form class="needs-validation" novalidate id="filtro-form">
-        <div class="row">
-          <div class="col-sm-6 col-lg-3">
-            <label for="estado" class="form-label">Estado</label>
-            <select class="form-select" id="estado" required>
-              <option value="">Seleccionar...</option>
-            </select>
-            <div class="invalid-feedback">Por favor selecciona un Estado.</div>
-          </div>
+  <div class="container my-4">
+  <div class="row">
+    <div class="col-lg-12 col-12 mb-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Seleccionar NodoIoT</h5>
+          <form class="needs-validation" novalidate id="filtro-form">
+            <div class="row g-3">
+              <div class="col-sm-6 col-lg-4">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" id="estado" required>
+                  <option value="">Seleccionar...</option>
+                </select>
+                <div class="invalid-feedback">Por favor selecciona un Estado.</div>
+              </div>
 
-          <div class="col-sm-6 col-lg-3">
-            <label for="municipio" class="form-label">Municipio</label>
-            <select class="form-select" id="municipio" required>
-              <option value="">Seleccionar...</option>
-            </select>
-            <div class="invalid-feedback">Selecciona un Municipio.</div>
-          </div>
+              <div class="col-sm-6 col-lg-4">
+                <label for="municipio" class="form-label">Municipio</label>
+                <select class="form-select" id="municipio" required>
+                  <option value="">Seleccionar...</option>
+                </select>
+                <div class="invalid-feedback">Selecciona un Municipio.</div>
+              </div>
 
-          <div class="col-sm-6 col-lg-3">
-            <label for="localidad" class="form-label">Localidad</label>
-            <select class="form-select" id="localidad" required>
-              <option value="">Selecciona...</option>
-            </select>
-            <div class="invalid-feedback">Selecciona una Localidad.</div>
-          </div>
+              <div class="col-sm-6 col-lg-4">
+                <label for="localidad" class="form-label">Localidad</label>
+                <select class="form-select" id="localidad" required>
+                  <option value="">Seleccionar...</option>
+                </select>
+                <div class="invalid-feedback">Selecciona una Localidad.</div>
+              </div>
 
-          <div class="col-sm-6 col-lg-3">
-            <button class="btn btn-primary col-sm-12 col-lg-12 mt-4" type="submit">Buscar</button>
-          </div>
+              <div class="col-12">
+                <button class="btn btn-primary mt-3 w-100" type="submit">Buscar</button>
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
-
-      <hr>
-
-      <h5 class="mt-3">Resultados</h5>
-      <ul class="list-group" id="resultado-lista">
-        <!-- Aquí se mostrarán los nodos filtrados -->
-      </ul>
+      </div>
     </div>
+
+    <div class="col-12" id="alertContainer"></div>
+
+		<div class="col-lg-12 col-12 mb-3">
+		  <div class="card">
+			<div class="card-body">
+			  <div class="d-flex justify-content-between align-items-center">
+				<h5 class="card-title mb-0">Resultados</h5>
+				<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
+				  Mostrar / Ocultar
+				</button>
+			  </div>
+
+			  <div id="collapseResultadosContent" class="collapse show mt-2">
+				<div style="max-height: 300px; overflow-y: auto;">
+				  <ul class="list-group" id="resultado-lista">
+					<li class="list-group-item">Usa los filtros para ver los nodos.</li>
+				  </ul>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+
+    <div class="col-12">
+	  <div style="max-height: 400px; overflow-y: auto;">
+		<div class="row" id="monitoreo-contenedor">
+		  <!-- Aquí se renderizan las tarjetas del monitoreo -->
+		</div> <!-- cierre del .row -->
+	  </div> <!-- cierre del div con scroll -->
+	</div> <!-- cierre del .col-12 -->
   </div>
 </div>
-		
-	  
-    <div class="col-sm-6 col-lg-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title"> <img src="gift/home.gif" alt="ajustes" width="16" height="16"/> Pluvialidad</h5>
-          <p class="card-text">2.5 mm/h</p>
-          <p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        </div>
-      </div>
-    </div>
-	  
-	<div class="col-sm-6 col-lg-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">PM 10</h5>
-          <p class="card-text">45 µg/m³</p>
-          <p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        </div>
-      </div>
-    </div>
-	  
-	<div class="col-sm-6 col-lg-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">PM 2.5</h5>
-          <p class="card-text">25 µg/m³</p>
-          <p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        </div>
-      </div>
-    </div>
-	  
-	<div class="col-sm-6 col-lg-4 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">CO2</h5>
-          <p class="card-text">420 ppm</p>
-          <p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        </div>
-      </div>
-    </div>
-	  
-	  <div class="col-sm-6 col-lg-4 mb-3">
-      	<div class="card">
-        	<div class="card-body">
-          		<h5 class="card-title mb-1">Preción barometrica y altitud</h5>
-          		<p class="card-text m-0">Presión: 1013 hPa </p>
-				<p class="card-text m-0">Altitud: 1500 m</p>
-          		<p class="card-text m-0"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        	</div>
-      	</div>
-      </div>
-	  
-	  <div class="col-sm-6 col-lg-4 mb-3">
-      	<div class="card">
-        	<div class="card-body">
-          		<h5 class="card-title">Temperatura</h5>
-          		<p class="card-text">22.4°C</p>
-          		<p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        	</div>
-      	</div>
-      </div>
-	  
-	  <div class="col-sm-6 col-lg-4 mb-3">
-      	<div class="card">
-        	<div class="card-body">
-          		<h5 class="card-title mb-1">Viento: velocidad y dirección</h5>
-          		<p class="card-text m-0">Velocidad: 15 km/h</p>
-				<p class="card-text m-0">Dirección: 270° (Oeste)</p>
-          		<p class="card-text m-0"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        	</div>
-      	</div>
-      </div>
-	  
-	  <div class="col-sm-6 col-lg-4 mb-3">
-      	<div class="card">
-        	<div class="card-body">
-          		<h5 class="card-title">Humedad</h5>
-          		<p class="card-text">Caja Elijida Para hacer lo chido.</p>
-          		<p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        	</div>
-      	</div>
-      </div>
-	  
-	  <div class="col-sm-6 col-lg-4 mb-3">
-      	<div class="card">
-        	<div class="card-body">
-          		<h5 class="card-title">Luz Solar</h5>
-          		<p class="card-text">Caja Elijida Para hacer lo chido.</p>
-          		<p class="card-text"><small class="text-body-secondary">Ultima actualizacion 3:29 P.M.</small></p>
-        	</div>
-      	</div>
-      </div>
-	  
-  </div>
 </main>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  // Datos de prueba (puede ser de una API)
-  const nodos = [
-    { id: 1, nombre: "Nodo A", estado: "Jalisco", municipio: "Tala", localidad: "Centro" },
-    { id: 2, nombre: "Nodo B", estado: "Jalisco", municipio: "Ameca", localidad: "Cuvalles" },
-    { id: 3, nombre: "Nodo C", estado: "Chiapas", municipio: "San Cristóbal", localidad: "Zona 1" },
-    { id: 4, nombre: "Nodo D", estado: "Yucatán", municipio: "Mérida", localidad: "Col. México" }
-  ];
+		const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+		const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
-  const estados = [...new Set(nodos.map(n => n.estado))];
-  const estadoSelect = document.getElementById("estado");
-  const municipioSelect = document.getElementById("municipio");
-  const localidadSelect = document.getElementById("localidad");
-  const resultadoLista = document.getElementById("resultado-lista");
+		const selectEstado = document.getElementById('estado');
+		const selectMunicipio = document.getElementById('municipio');
+		const selectLocalidad = document.getElementById('localidad');
+		const form = document.getElementById('filtro-form');
+		const alertContainer = document.getElementById('alertContainer');
+		const resultadoLista = document.getElementById('resultado-lista');
+		const monitoreoContenedor = document.getElementById('monitoreo-contenedor');
 
-  // Cargar estados
-  estados.forEach(estado => {
-    let option = new Option(estado, estado);
-    estadoSelect.appendChild(option);
-  });
+		let zonasDisponibles = [];
 
-  // Evento para cargar Municipios según el Estado seleccionado
-  estadoSelect.addEventListener("change", function() {
-    municipioSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-    localidadSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-    
-    const municipios = [...new Set(nodos.filter(n => n.estado === this.value).map(n => n.municipio))];
-    municipios.forEach(municipio => {
-      let option = new Option(municipio, municipio);
-      municipioSelect.appendChild(option);
-    });
-  });
+		function llenarSelect(select, items) {
+		  select.innerHTML = '<option value="">Seleccionar...</option>';
+		  [...new Set(items)].forEach(item => {
+			const option = document.createElement('option');
+			option.value = item;
+			option.textContent = item;
+			select.appendChild(option);
+		  });
+		}
 
-  // Evento para cargar Localidades según el Municipio seleccionado
-  municipioSelect.addEventListener("change", function() {
-    localidadSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-    
-    const localidades = [...new Set(nodos.filter(n => n.municipio === this.value).map(n => n.localidad))];
-    localidades.forEach(localidad => {
-      let option = new Option(localidad, localidad);
-      localidadSelect.appendChild(option);
-    });
-  });
+		function mostrarAlerta(mensaje, tipo = 'info') {
+		  const alertId = `alert-${Date.now()}`;
+		  const alertHTML = `
+			<div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+			  ${mensaje}
+			  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+			</div>
+		  `;
+		  alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+		  setTimeout(() => {
+			const alertEl = document.getElementById(alertId);
+			if (alertEl) alertEl.remove();
+		  }, 4000);
+		}
 
-  // Evento para filtrar nodos y mostrarlos en la lista
-  document.getElementById("filtro-form").addEventListener("submit", function(event) {
-    event.preventDefault();
-    resultadoLista.innerHTML = "";
+		async function obtenerZonas() {
+		  try {
+			const res = await fetch(`${apiBase}/api/zonas`);
+			if (!res.ok) throw new Error('Error al obtener zonas');
+			zonasDisponibles = await res.json();
+			const estados = zonasDisponibles.map(z => z.estado);
+			llenarSelect(selectEstado, estados);
+		  } catch (error) {
+			mostrarAlerta('Error al cargar zonas.', 'danger');
+			console.error(error);
+		  }
+		}
 
-    const estado = estadoSelect.value;
-    const municipio = municipioSelect.value;
-    const localidad = localidadSelect.value;
+		async function obtenerDatos(filtro = {}) {
+		  try {
+			const res = await fetch(`${apiBase}/api/nodos`);
+			if (!res.ok) throw new Error('Error al obtener nodos');
+			const nodos = await res.json();
 
-    const nodosFiltrados = nodos.filter(n =>
-      (!estado || n.estado === estado) &&
-      (!municipio || n.municipio === municipio) &&
-      (!localidad || n.localidad === localidad)
-    );
+			const mapaZonas = new Map(zonasDisponibles.map(z => [z.id_zona || z._id, z]));
 
-    if (nodosFiltrados.length > 0) {
-      nodosFiltrados.forEach(nodo => {
-        let li = document.createElement("li");
-        li.classList.add("list-group-item");
-        li.textContent = nodo.nombre;
-        resultadoLista.appendChild(li);
-      });
-    } else {
-      let li = document.createElement("li");
-      li.classList.add("list-group-item", "text-muted");
-      li.textContent = "No se encontraron nodos.";
-      resultadoLista.appendChild(li);
-    }
-  });
-});
+			const nodosFiltrados = nodos.filter(nodo => {
+			  const zona = mapaZonas.get(nodo.id_zona) || {};
+			  return (!filtro.estado || zona.estado === filtro.estado) &&
+					 (!filtro.municipio || zona.municipio === filtro.municipio) &&
+					 (!filtro.localidad || zona.localidad === filtro.localidad);
+			});
+
+			resultadoLista.innerHTML = '';
+			monitoreoContenedor.innerHTML = '';
+
+			if (nodosFiltrados.length === 0) {
+			  resultadoLista.innerHTML = '<li class="list-group-item">No se encontraron nodos con esos filtros.</li>';
+			  return;
+			}
+
+			nodosFiltrados.forEach(nodo => {
+			  const li = document.createElement('li');
+			  li.className = 'list-group-item list-group-item-action';
+			  li.style.cursor = 'pointer';
+			  li.textContent = `${nodo.nombre} (${nodo.cordenadas})`;
+			  li.addEventListener('click', () => mostrarMonitoreoNodo(nodo.id_nodo, nodo.nombre));
+			  resultadoLista.appendChild(li);
+			});
+
+		  } catch (error) {
+			mostrarAlerta('Error al obtener nodos.', 'danger');
+			console.error(error);
+		  }
+		}
+
+		async function mostrarMonitoreoNodo(id_nodo, nombreNodo) {
+		  try {
+			const res = await fetch(`${apiBase}/api/monitoreos`);
+			if (!res.ok) throw new Error('Error al obtener monitoreos');
+			const monitoreos = await res.json();
+
+			const monitoreosNodo = monitoreos.filter(m => m.id_nodo === id_nodo);
+
+			if (monitoreosNodo.length === 0) {
+			  monitoreoContenedor.innerHTML = `<div class="col-12"><div class="alert alert-warning">El nodo ${nombreNodo} no tiene monitoreo registrado.</div></div>`;
+			  return;
+			}
+
+			const monitoreoReciente = monitoreosNodo.reduce((a, b) => {
+			  const fechaA = new Date(`${a.fecha}T${a.hora}`);
+			  const fechaB = new Date(`${b.fecha}T${b.hora}`);
+			  return fechaA > fechaB ? a : b;
+			});
+
+			monitoreoContenedor.innerHTML = '';
+			monitoreoReciente.Datos.forEach(dato => {
+			  const card = `
+				<div class="col-sm-6 col-lg-4 mb-3">
+				  <div class="card">
+					<div class="card-body">
+					  <h5 class="card-title text-capitalize">${dato.tipo}</h5>
+					  <p class="card-text">${dato.valor}</p>
+					  <p class="card-text"><small class="text-body-secondary">Última actualización ${monitoreoReciente.hora} - ${monitoreoReciente.fecha}</small></p>
+					</div>
+				  </div>
+				</div>
+			  `;
+			  monitoreoContenedor.insertAdjacentHTML('beforeend', card);
+			});
+
+		  } catch (error) {
+			mostrarAlerta('Error al obtener monitoreo.', 'danger');
+			console.error(error);
+		  }
+		}
+
+		form.addEventListener('submit', e => {
+		  e.preventDefault();
+		  obtenerDatos({
+			estado: selectEstado.value || null,
+			municipio: selectMunicipio.value || null,
+			localidad: selectLocalidad.value || null
+		  });
+		});
+
+		selectEstado.addEventListener('change', () => {
+		  const municipios = zonasDisponibles
+			.filter(z => z.estado === selectEstado.value)
+			.map(z => z.municipio);
+		  llenarSelect(selectMunicipio, municipios);
+		  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+		});
+
+		selectMunicipio.addEventListener('change', () => {
+		  const localidades = zonasDisponibles
+			.filter(z => z.estado === selectEstado.value && z.municipio === selectMunicipio.value)
+			.map(z => z.localidad);
+		  llenarSelect(selectLocalidad, localidades);
+		});
+
+		obtenerZonas().then(obtenerDatos);
 </script>
 	  
 							
