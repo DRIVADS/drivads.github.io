@@ -103,6 +103,26 @@
       .bd-mode-toggle .dropdown-menu .active .bi {
         display: block !important;
       }
+	
+	  body, html {
+		margin: 0;
+		padding: 0;
+	  }
+
+	  .full-width-container {
+		width: 100vw;
+		padding: 10px;
+	  }
+
+	  #monitoreo-scroll {
+		max-height: 60vh; /* O ajusta al % que quieras del alto de pantalla */
+		overflow-y: auto;
+	  }
+
+	  #resultados-scroll {
+		max-height: 30vh;
+		overflow-y: auto;
+	  }
     </style>
 
     
@@ -232,80 +252,79 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap">
+  <main class="d-flex flex-nowrap" style="width: 100vw;">
   
   <!--<div class="col-sm-6 col-lg-12 m-2 row" style="max-height: 600px; overflow-y: auto;">-->
-  <div class="container my-4">
-  <div class="row">
-    <div class="col-lg-12 col-12 mb-3">
+  <div class="full-width-container">
+  <div class="row g-3">
+    <!-- Buscador + Resultados -->
+    <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Seleccionar NodoIoT</h5>
           <form class="needs-validation" novalidate id="filtro-form">
-            <div class="row g-3">
-              <div class="col-sm-6 col-lg-4">
+            <div class="row">
+              <div class="col-md-4 mb-2">
                 <label for="estado" class="form-label">Estado</label>
                 <select class="form-select" id="estado" required>
                   <option value="">Seleccionar...</option>
                 </select>
                 <div class="invalid-feedback">Por favor selecciona un Estado.</div>
               </div>
-
-              <div class="col-sm-6 col-lg-4">
+              <div class="col-md-4 mb-2">
                 <label for="municipio" class="form-label">Municipio</label>
                 <select class="form-select" id="municipio" required>
                   <option value="">Seleccionar...</option>
                 </select>
                 <div class="invalid-feedback">Selecciona un Municipio.</div>
               </div>
-
-              <div class="col-sm-6 col-lg-4">
+              <div class="col-md-4 mb-2">
                 <label for="localidad" class="form-label">Localidad</label>
                 <select class="form-select" id="localidad" required>
                   <option value="">Seleccionar...</option>
                 </select>
                 <div class="invalid-feedback">Selecciona una Localidad.</div>
               </div>
-
               <div class="col-12">
-                <button class="btn btn-primary mt-3 w-100" type="submit">Buscar</button>
+                <button class="btn btn-primary w-100 mt-2" type="submit">Buscar</button>
               </div>
             </div>
           </form>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Resultados</h5>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
+              Mostrar / Ocultar
+            </button>
+          </div>
+
+          <div id="collapseResultadosContent" class="collapse show mt-2">
+            <div id="resultados-scroll">
+              <ul class="list-group" id="resultado-lista">
+                <li class="list-group-item">Usa los filtros para ver los nodos.</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <div class="col-12" id="alertContainer"></div>
-
-		<div class="col-lg-12 col-12 mb-3">
-		  <div class="card">
-			<div class="card-body">
-			  <div class="d-flex justify-content-between align-items-center">
-				<h5 class="card-title mb-0">Resultados</h5>
-				<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
-				  Mostrar / Ocultar
-				</button>
-			  </div>
-
-			  <div id="collapseResultadosContent" class="collapse show mt-2">
-				<div style="max-height: 300px; overflow-y: auto;">
-				  <ul class="list-group" id="resultado-lista">
-					<li class="list-group-item">Usa los filtros para ver los nodos.</li>
-				  </ul>
-				</div>
-			  </div>
-			</div>
-		  </div>
-		</div>
-
+    <!-- Monitoreo -->
     <div class="col-12">
-	  <div style="max-height: 400px; overflow-y: auto;">
-		<div class="row" id="monitoreo-contenedor">
-		  <!-- Aquí se renderizan las tarjetas del monitoreo -->
-		</div> <!-- cierre del .row -->
-	  </div> <!-- cierre del div con scroll -->
-	</div> <!-- cierre del .col-12 -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Monitoreo</h5>
+          <div id="monitoreo-scroll">
+            <div class="row" id="monitoreo-contenedor">
+              <!-- Aquí se renderizan las tarjetas -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 </main>
