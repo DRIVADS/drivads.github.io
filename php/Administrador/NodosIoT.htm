@@ -560,7 +560,12 @@
 		  <select class="form-select sensor-select" required>
 			<option value="">Selecciona un sensor...</option>
 			${sensoresDisponibles.map(sensor =>
-			  `<option value='${JSON.stringify(sensor)}' ${sensorSeleccionado && sensor.id_sensor === sensorSeleccionado.id_sensor ? "selected" : ""}>
+			  `<option value='${JSON.stringify({
+				id_sensor: sensor.id_sensor,
+				nombre: sensor.nombre,
+				tipo_dato: sensor.tipo_dato,
+				analogico_digital: sensor.analogico_digital
+			  })}' ${sensorSeleccionado && sensor.id_sensor === sensorSeleccionado.id_sensor ? "selected" : ""}>
 				${sensor.nombre} (${sensor.tipo_dato})
 			  </option>`
 			).join('')}
@@ -597,10 +602,24 @@
 	  }
 
 	  const id_nodo = document.getElementById("idNodoM").value;
-	  const sensores = [...document.querySelectorAll("#sensorContainerM select.sensor-select")].map(s => {
-		if (!s.value) throw new Error('Sensor no seleccionado');
-		return JSON.parse(s.value);
-	  });
+
+	  let sensores;
+	  try {
+		sensores = [...document.querySelectorAll("#sensorContainerM select.sensor-select")].map(s => {
+		  if (!s.value) throw new Error('Sensor no seleccionado');
+		  const sensor = JSON.parse(s.value);
+		  return {
+			id_sensor: sensor.id_sensor,
+			nombre: sensor.nombre,
+			tipo_dato: sensor.tipo_dato,
+			analogico_digital: sensor.analogico_digital
+		  };
+		});
+	  } catch (error) {
+		mostrarAlerta('Por favor selecciona un sensor válido en cada entrada.', 'danger');
+		console.error(error);
+		return;
+	  }
 
 	  const nodoActualizado = {
 		nombre: document.getElementById("nombreNodoM").value.trim(),
@@ -627,7 +646,6 @@
 		console.error(error);
 	  }
 	}
-
 	// ========== EVENTOS ==========
 	form.addEventListener('submit', e => {
 	  e.preventDefault();
