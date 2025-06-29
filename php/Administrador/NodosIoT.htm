@@ -386,6 +386,25 @@
 <!-- Contenedor de alertas -->
 <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmarEliminarLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este nodo?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnEliminarConfirmado">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 	
 </main>
 	  
@@ -477,7 +496,7 @@
 			<td>${zona.estado || ''}</td>
 			<td>${zona.codigoPostal || ''}</td>
 			<td>
-			  <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarNodo('${nodo.id_nodo}')">Eliminar</button>
+			  <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacion('${nodo.id_nodo}')">Eliminar</button>
 			  <button class="btn btn-info btn-sm col-12" onclick="modificarNodo('${nodo.id_nodo}')">Modificar</button>
 			</td>
 		  `;
@@ -489,10 +508,21 @@
 	  }
 	}
 
-	async function eliminarNodo(id) {
-	  if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
+	let idNodoAEliminar = null;
+
+	// Función para abrir el modal y guardar el ID temporalmente
+	function confirmarEliminacion(id) {
+	  idNodoAEliminar = id;
+	  const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
+	  modal.show();
+	}
+
+	// Botón "Eliminar" dentro del modal
+	document.getElementById('btnEliminarConfirmado').addEventListener('click', async () => {
+	  if (!idNodoAEliminar) return;
+
 	  try {
-		const res = await fetch(`${apiBase}/api/nodos/${id}`, { method: 'DELETE' });
+		const res = await fetch(`${apiBase}/api/nodos/${idNodoAEliminar}`, { method: 'DELETE' });
 		if (res.ok) {
 		  mostrarAlerta('Nodo eliminado exitosamente.', 'success');
 		  obtenerDatos();
@@ -502,8 +532,13 @@
 	  } catch (error) {
 		mostrarAlerta('Error al eliminar nodo.', 'danger');
 		console.error(error);
+	  } finally {
+		// Cierra el modal
+		const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar'));
+		modal.hide();
+		idNodoAEliminar = null;
 	  }
-	}
+	});
 
 	// ========== MODIFICAR NODO ==========
 	async function cargarZonasModal() {
