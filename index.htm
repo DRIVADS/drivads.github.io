@@ -115,8 +115,7 @@
 	  }
 
 	  #monitoreo-scroll {
-		max-height: 60vh; /* O ajusta al % que quieras del alto de pantalla */
-		overflow-y: auto;
+		max-height: auto; /* O ajusta al % que quieras del alto de pantalla */
 	  }
 
 	  #resultados-scroll {
@@ -252,7 +251,7 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap" style="width: 100vw;">
+  <main class="d-flex flex-nowrap" style="width: 100vw; overflow-y: auto;" >
   
   <!--<div class="col-sm-6 col-lg-12 m-2 row" style="max-height: 600px; overflow-y: auto;">-->
   <div class="full-width-container">
@@ -306,6 +305,23 @@
                 </ul>
               </div>
             </div>
+			  
+			<hr>
+			  
+		  <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Sensores del Nodo</h5>
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSensores">
+                Mostrar / Ocultar
+              </button>
+            </div>
+
+            <div id="collapseSensores" class="collapse show mt-2">
+              <div id="sensores-scroll">
+                <div class="row" id="sensores-contenedor">
+                  <!-- Tarjetas de sensores -->
+                </div>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -327,20 +343,7 @@
 
             <hr>
 
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">Sensores del Nodo</h5>
-              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSensores">
-                Mostrar / Ocultar
-              </button>
-            </div>
-
-            <div id="collapseSensores" class="collapse show mt-2">
-              <div id="sensores-scroll">
-                <div class="row" id="sensores-contenedor">
-                  <!-- Tarjetas de sensores -->
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
