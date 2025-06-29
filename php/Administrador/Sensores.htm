@@ -349,6 +349,25 @@
   </div>
 </div>
 
+<!-- Modal de Confirmación para Eliminar Sensor -->
+<div class="modal fade" id="modalEliminarSensor" tabindex="-1" aria-labelledby="modalEliminarSensorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalEliminarSensorLabel">Eliminar Sensor</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este sensor?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarEliminarSensor">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   const proxy = "https://cors-anywhere.herokuapp.com/";
   const apiBase = "https://smma-aobk.onrender.com/api/sensors";
@@ -398,7 +417,7 @@
         <td>${sensor.analogico_digital || 'N/A'}</td>
         <td>${sensor.id_sensor || 'N/A'}</td>
         <td>
-          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarSensor('${sensor.id_sensor}')">Eliminar</button>
+          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacionSensor('${sensor.id_sensor}')">Eliminar</button>
           <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
         </td>
       </tr>
@@ -417,17 +436,30 @@
     mostrarSensores(filtrados);
   }
 
-  async function eliminarSensor(id) {
-    if (!confirm('¿Estás seguro de eliminar este sensor?')) return;
-    try {
-      await apiRequest(`${apiBase}/${id}`, { method: 'DELETE' });
-      mostrarAlerta('Sensor eliminado exitosamente.', 'success');
-      obtenerSensores();
-    } catch (error) {
-      console.error(error);
-      mostrarAlerta('Error al eliminar el sensor.', 'danger');
-    }
-  }
+    let idSensorAEliminar = null;
+
+	function confirmarEliminacionSensor(id) {
+	  idSensorAEliminar = id;
+	  const modal = new bootstrap.Modal(document.getElementById('modalEliminarSensor'));
+	  modal.show();
+	}
+
+	document.getElementById('btnConfirmarEliminarSensor').addEventListener('click', async () => {
+	  if (!idSensorAEliminar) return;
+
+	  try {
+		await apiRequest(`${apiBase}/${idSensorAEliminar}`, { method: 'DELETE' });
+		mostrarAlerta('Sensor eliminado exitosamente.', 'success');
+		obtenerSensores();
+	  } catch (error) {
+		console.error(error);
+		mostrarAlerta('Error al eliminar el sensor.', 'danger');
+	  } finally {
+		const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarSensor'));
+		modal.hide();
+		idSensorAEliminar = null;
+	  }
+	});
 
   function modificarSensor(id, tipo, nombre, dato) {
     document.getElementById("sensorIdM").value = id;
