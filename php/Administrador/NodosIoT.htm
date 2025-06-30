@@ -485,11 +485,21 @@
 				 (!filtro.localidad || zona.localidad === filtro.localidad);
 		});
 
+		// Si no hay nodos filtrados, mostrar mensaje
+		if (nodosFiltrados.length === 0) {
+		  const tr = document.createElement('tr');
+		  tr.innerHTML = `
+			<td colspan="10" class="text-center text-muted fs-5">No se encontraron nodos para los filtros seleccionados.</td>
+		  `;
+		  tbody.appendChild(tr);
+		  return; // Salir de la función
+		}
+
 		nodosFiltrados.forEach(nodo => {
 		  const zona = mapaZonas.get(nodo.id_zona) || {};
 		  const sensoresNombres = (nodo.sensores || [])
-		  .map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
-		  .join('<br>');
+			.map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
+			.join('<br>');
 
 		  const tr = document.createElement('tr');
 		  tr.innerHTML = `
@@ -497,7 +507,9 @@
 			<td>${nodo.cordenadas || ''}</td>
 			<td>${nodo.fecha_imp || ''}</td>
 			<td>${nodo.mac || ''}</td>
-			<td style="max-height: 100px; overflow-y: auto; white-space: normal; word-break: break-word;"><span class="text-truncate d-inline-block" style="max-width: 200px;">${sensoresNombres}</span></td>
+			<td style="max-height: 100px; overflow-y: auto; white-space: normal; word-break: break-word;">
+			  <span class="text-truncate d-inline-block" style="max-width: 200px;">${sensoresNombres}</span>
+			</td>
 			<td>${zona.localidad || ''}</td>
 			<td>${zona.municipio || ''}</td>
 			<td>${zona.estado || ''}</td>
@@ -514,7 +526,7 @@
 		console.error(error);
 	  }
 	}
-
+	// aqui termina lo de nodos buscar
 	let idNodoAEliminar = null;
 
 	// Función para abrir el modal y guardar el ID temporalmente
