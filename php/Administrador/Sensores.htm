@@ -409,20 +409,33 @@
   }
 
   function mostrarSensores(sensores) {
-    const tbody = document.getElementById('sensoresBody');
-    tbody.innerHTML = sensores.map(sensor => `
-      <tr>
-        <td>${sensor.nombre || 'N/A'}</td>
-        <td>${sensor.tipo_dato || 'N/A'}</td>
-        <td>${sensor.analogico_digital || 'N/A'}</td>
-        <td>${sensor.id_sensor || 'N/A'}</td>
-        <td>
-          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacionSensor('${sensor.id_sensor}')">Eliminar</button>
-          <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
-        </td>
-      </tr>
-    `).join('');
+  const tbody = document.getElementById('sensoresBody');
+  tbody.innerHTML = '';
+
+  if (sensores.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td colspan="5" class="text-center text-muted fs-5">
+        No se encontraron sensores para los filtros seleccionados.
+      </td>
+    `;
+    tbody.appendChild(tr);
+    return;
   }
+
+  tbody.innerHTML = sensores.map(sensor => `
+    <tr>
+      <td>${sensor.nombre || 'N/A'}</td>
+      <td>${sensor.tipo_dato || 'N/A'}</td>
+      <td>${sensor.analogico_digital || 'N/A'}</td>
+      <td>${sensor.id_sensor || 'N/A'}</td>
+      <td>
+        <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacionSensor('${sensor.id_sensor}')">Eliminar</button>
+        <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
+      </td>
+    </tr>
+  `).join('');
+}
 
   function filtrarSensores() {
     const tipoDato = document.getElementById('tipoDato').value;
