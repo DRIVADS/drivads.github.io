@@ -102,6 +102,12 @@
       .bd-mode-toggle .dropdown-menu .active .bi {
         display: block !important;
       }
+		
+	  table td, table th {
+		white-space: normal;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+	  }
     </style>
 
     
@@ -294,12 +300,13 @@
           <div class="card-body">
             <h5 class="card-title"> NodosIoT registrados</h5>
             <!-- Añadido scroll aquí -->
-            <div style="max-height: 400px; overflow-y: auto;">
-              <table class="table table-striped table-sm">
-			  <thead>
+            <div style="max-height: 400px; overflow-y: auto; width: 100%; overflow-x: hidden;">
+			  <table class="table table-striped table-sm" style="width: 100%; table-layout: fixed;">
+				<thead class="thead-dark">
+			  <thead class="thead-dark">
 				<tr>
 				  <th>Nombre</th>
-				  <th>Coordenadas</th>
+				  <th>Coord.</th>
 				  <th>Fecha Impl</th>
 				  <th>MAC</th>
 				  <th>Sensor</th>
@@ -481,8 +488,8 @@
 		nodosFiltrados.forEach(nodo => {
 		  const zona = mapaZonas.get(nodo.id_zona) || {};
 		  const sensoresNombres = (nodo.sensores || [])
-			.map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
-			.join(' ');
+		  .map(s => `${s.nombre}/${s.tipo_dato}/${s.analogico_digital}`)
+		  .join('<br>');
 
 		  const tr = document.createElement('tr');
 		  tr.innerHTML = `
@@ -490,7 +497,7 @@
 			<td>${nodo.cordenadas || ''}</td>
 			<td>${nodo.fecha_imp || ''}</td>
 			<td>${nodo.mac || ''}</td>
-			<td>${sensoresNombres}</td>
+			<td style="max-height: 100px; overflow-y: auto; white-space: normal; word-break: break-word;"><span class="text-truncate d-inline-block" style="max-width: 200px;">${sensoresNombres}</span></td>
 			<td>${zona.localidad || ''}</td>
 			<td>${zona.municipio || ''}</td>
 			<td>${zona.estado || ''}</td>
