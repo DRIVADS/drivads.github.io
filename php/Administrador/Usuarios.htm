@@ -342,7 +342,7 @@
           <td>${usuario.matricula || 'N/A'}</td>
           <td>
             <button class="btn btn-danger btn-sm col-12 mb-1" onclick="eliminarUsuario('${usuario.matricula}')">Eliminar</button>
-            <button class="btn btn-info btn-sm col-12" onclick="modificarUsuario('${usuario.matricula}')">Modificar</button>
+            <button class="btn btn-info btn-sm col-12" onclick="modificarUsuario('${usuario.matricula}')">Administrador</button>
           </td>
         </tr>
       `;
@@ -363,14 +363,55 @@
   }
 
   // Placeholder para eliminar
-  function eliminarUsuario(matricula) {
-    alert(`Eliminar usuario con matrícula: ${matricula}`);
-  }
+  async function eliminarUsuario(matricula) {
+	  if (!confirm(`¿Estás seguro de que quieres eliminar al usuario con matrícula ${matricula}?`)) return;
+
+	  try {
+		const res = await fetch(proxy + `${apiUsuarios}/${matricula}`, {
+		  method: 'DELETE'
+		});
+
+		if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+
+		alert("Usuario eliminado correctamente.");
+		await obtenerUsuarios(); // Recargar la lista
+	  } catch (error) {
+		console.error("Error al eliminar usuario:", error);
+		alert("Error al eliminar usuario.");
+	  }
+	}
+
 
   // Placeholder para modificar
-  function modificarUsuario(matricula) {
-    alert(`Modificar usuario con matrícula: ${matricula}`);
-  }
+  async function modificarUsuario(matricula) {
+	  try {
+		// Obtener el usuario actual para conservar sus datos
+		const usuario = usuariosData.find(u => u.matricula === matricula);
+		if (!usuario) throw new Error("Usuario no encontrado");
+
+		const usuarioActualizado = {
+		  ...usuario,
+		  Rol: "Administrador"
+		};
+
+		const res = await fetch(proxy + `${apiUsuarios}/${matricula}`, {
+		  method: 'PUT',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify(usuarioActualizado)
+		});
+
+		if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+
+		alert("Rol actualizado a Administrador.");
+		await obtenerUsuarios(); // Recargar la lista
+	  } catch (error) {
+		console.error("Error al actualizar usuario:", error);
+		alert("No se pudo cambiar el rol del usuario.");
+	  }
+	}
+
 
   // Evento del input
   document.getElementById('nombre').addEventListener('input', e => {
