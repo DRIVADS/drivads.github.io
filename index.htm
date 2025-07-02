@@ -262,29 +262,41 @@
           <div class="card-body">
             <form class="needs-validation" novalidate id="filtro-form">
               <div class="row">
-                <div class="col-md-4 mb-2">
+				  
+				<div class="col-sm-6 col-lg-3">
+				  <label for="pais" class="form-label">País</label>
+				  <select class="form-select" id="pais" required>
+					<option value="">Seleccionar...</option>
+				  </select>
+				  <div class="invalid-feedback">Selecciona un País.</div>
+				</div>
+				  
+                <div class="col-sm-6 col-lg-3">
                   <label for="estado" class="form-label">Estado</label>
                   <select class="form-select" id="estado" required>
                     <option value="">Seleccionar...</option>
                   </select>
                   <div class="invalid-feedback">Por favor selecciona un Estado.</div>
                 </div>
-                <div class="col-md-4 mb-2">
+				  
+                <div class="col-sm-6 col-lg-3">
                   <label for="municipio" class="form-label">Municipio</label>
                   <select class="form-select" id="municipio" required>
                     <option value="">Seleccionar...</option>
                   </select>
                   <div class="invalid-feedback">Selecciona un Municipio.</div>
                 </div>
-                <div class="col-md-4 mb-2">
+				  
+                <div class="col-sm-6 col-lg-3">
                   <label for="localidad" class="form-label">Localidad</label>
                   <select class="form-select" id="localidad" required>
                     <option value="">Seleccionar...</option>
                   </select>
                   <div class="invalid-feedback">Selecciona una Localidad.</div>
                 </div>
-                <div class="col-12">
-                  <button class="btn btn-primary w-100 mt-2" type="submit">Buscar</button>
+				  
+                <div class="col-sm-6 col-lg-3">
+                  <button class="btn btn-primary w-100 mt-3" type="submit">Buscar</button>
                 </div>
               </div>
             </form>
@@ -355,6 +367,7 @@
   const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
   const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
+  const selectPais = document.getElementById('pais');
   const selectEstado = document.getElementById('estado');
   const selectMunicipio = document.getElementById('municipio');
   const selectLocalidad = document.getElementById('localidad');
@@ -396,8 +409,8 @@
       const res = await fetch(`${apiBase}/api/zonas`);
       if (!res.ok) throw new Error('Error al obtener zonas');
       zonasDisponibles = await res.json();
-      const estados = zonasDisponibles.map(z => z.estado);
-      llenarSelect(selectEstado, estados);
+      const paises = zonasDisponibles.map(z => z.pais);
+	  llenarSelect(selectPais, paises);
     } catch (error) {
       mostrarAlerta('Error al cargar zonas.', 'danger');
       console.error(error);
@@ -414,9 +427,10 @@
 
       const nodosFiltrados = nodos.filter(nodo => {
         const zona = mapaZonas.get(nodo.id_zona) || {};
-        return (!filtro.estado || zona.estado === filtro.estado) &&
-               (!filtro.municipio || zona.municipio === filtro.municipio) &&
-               (!filtro.localidad || zona.localidad === filtro.localidad);
+        return (!filtro.pais || zona.pais === filtro.pais) &&
+			   (!filtro.estado || zona.estado === filtro.estado) &&
+			   (!filtro.municipio || zona.municipio === filtro.municipio) &&
+			   (!filtro.localidad || zona.localidad === filtro.localidad);
       });
 
       resultadoLista.innerHTML = '';
@@ -508,26 +522,40 @@
   form.addEventListener('submit', e => {
     e.preventDefault();
     obtenerDatos({
-      estado: selectEstado.value || null,
-      municipio: selectMunicipio.value || null,
-      localidad: selectLocalidad.value || null
-    });
+	  pais: selectPais.value || null,
+	  estado: selectEstado.value || null,
+	  municipio: selectMunicipio.value || null,
+	  localidad: selectLocalidad.value || null
+	});
   });
 
   selectEstado.addEventListener('change', () => {
-    const municipios = zonasDisponibles
-      .filter(z => z.estado === selectEstado.value)
-      .map(z => z.municipio);
-    llenarSelect(selectMunicipio, municipios);
-    selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-  });
+	  const municipios = zonasDisponibles
+		.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value)
+		.map(z => z.municipio);
+	  llenarSelect(selectMunicipio, municipios);
+	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+	});
 
   selectMunicipio.addEventListener('change', () => {
-    const localidades = zonasDisponibles
-      .filter(z => z.estado === selectEstado.value && z.municipio === selectMunicipio.value)
-      .map(z => z.localidad);
-    llenarSelect(selectLocalidad, localidades);
-  });
+	  const localidades = zonasDisponibles
+		.filter(z =>
+		  z.pais === selectPais.value &&
+		  z.estado === selectEstado.value &&
+		  z.municipio === selectMunicipio.value
+		)
+		.map(z => z.localidad);
+	  llenarSelect(selectLocalidad, localidades);
+	});
+ 
+  selectPais.addEventListener('change', () => {
+	  const estados = zonasDisponibles
+		.filter(z => z.pais === selectPais.value)
+		.map(z => z.estado);
+	  llenarSelect(selectEstado, estados);
+	  selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
+	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+	});
 
   obtenerZonas().then(obtenerDatos);
 </script>
