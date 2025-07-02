@@ -305,9 +305,31 @@
 
     </div>
   </div>
+</main>	  							
 </main>
-	  							
-</main>
+
+<!-- Contenedor de alertas -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmarEliminarLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este usuario?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnEliminarConfirmado">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+	  
 <script>
   const proxy = "https://cors-anywhere.herokuapp.com/";
   const apiUsuarios = "https://smma-aobk.onrender.com/api/usuarios";
@@ -363,23 +385,34 @@
   }
 
   // Placeholder para eliminar
-  async function eliminarUsuario(matricula) {
-	  if (!confirm(`¿Estás seguro de que quieres eliminar al usuario con matrícula ${matricula}?`)) return;
+   let matriculaAEliminar = null;
+
+	function eliminarUsuario(matricula) {
+	  matriculaAEliminar = matricula;
+	  const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
+	  modal.show();
+	}
+
+	document.getElementById('btnEliminarConfirmado').addEventListener('click', async () => {
+	  if (!matriculaAEliminar) return;
 
 	  try {
-		const res = await fetch(proxy + `${apiUsuarios}/${matricula}`, {
+		const res = await fetch(proxy + `${apiUsuarios}/${matriculaAEliminar}`, {
 		  method: 'DELETE'
 		});
 
 		if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
-		alert("Usuario eliminado correctamente.");
-		await obtenerUsuarios(); // Recargar la lista
+		mostrarAlerta("Usuario eliminado correctamente.", "success");
+		await obtenerUsuarios();
 	  } catch (error) {
 		console.error("Error al eliminar usuario:", error);
-		alert("Error al eliminar usuario.");
+		mostrarAlerta("Error al eliminar usuario.", "danger");
+	  } finally {
+		bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
+		matriculaAEliminar = null;
 	  }
-	}
+	});
 
 
   // Placeholder para modificar
@@ -417,6 +450,20 @@
   document.getElementById('nombre').addEventListener('input', e => {
     filtrarUsuariosPorNombre(e.target.value);
   });
+
+  function mostrarAlerta(mensaje, tipo = 'info') {
+	  const alertId = `alert-${Date.now()}`;
+	  const alertHTML = `
+		<div id="${alertId}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+		  ${mensaje}
+		  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+		</div>`;
+	  document.getElementById('alertContainer').insertAdjacentHTML('beforeend', alertHTML);
+	  setTimeout(() => {
+		const alertEl = document.getElementById(alertId);
+		if (alertEl) alertEl.remove();
+	  }, 4000);
+	}
 
   // Inicialización
   obtenerUsuarios();
