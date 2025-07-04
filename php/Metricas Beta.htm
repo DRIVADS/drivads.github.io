@@ -232,7 +232,7 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap">
+  <main class="d-flex flex-nowrap" style="overflow-y: auto; max-height: 100vh;">
 	  <div class="row">
 			<!-- FORMULARIO DE UBICACIÓN -->
 			<div class="col-12 mb-3">
@@ -268,11 +268,11 @@
 					  Mostrar / Ocultar
 					</button>
 				  </div>
-				  <div id="collapseResultadosContent" class="collapse show mt-2">
-					<ul class="list-group" id="resultado-lista">
-					  <li class="list-group-item">Usa los filtros para ver los nodos.</li>
-					</ul>
-				  </div>
+					  <div id="collapseResultadosContent" class="collapse show mt-2" style="max-height: 300px; overflow-y: auto;">
+					  <ul class="list-group" id="resultado-lista">
+						<li class="list-group-item">Usa los filtros para ver los nodos.</li>
+					  </ul>
+					</div>
 				</div>
 			  </div>
 			</div>
@@ -288,7 +288,9 @@
 					</button>
 				  </div>
 				  <div id="collapseSensores" class="collapse show mt-2">
-					<div class="row" id="sensores-contenedor"></div>
+					<div class="row">
+					  <div class="col-md-12" id="sensores-contenedor"></div>
+					</div>
 				  </div>
 				</div>
 			  </div>
@@ -408,23 +410,26 @@
   }
 
   function renderizarSensores(sensores) {
-    sensoresContenedor.innerHTML = '';
-    sensores.forEach(sensor => {
-      const div = document.createElement('div');
-      div.className = 'col-sm-6 col-lg-4 mb-3';
-      div.innerHTML = `
-        <div class="card">
-          <div class="card-body">
-            <h6 class="card-title">${sensor.nombre}</h6>
-            <p class="card-text">Tipo: ${sensor.tipo_dato}</p>
-            <p class="card-text">Modo: ${sensor.analogico_digital}</p>
-          </div>
-        </div>`;
-      sensoresContenedor.appendChild(div);
-    });
-
-    // También podrías llenar los checkboxes de contaminantes aquí si lo deseas
+  sensoresContenedor.innerHTML = '';
+  if (sensores.length === 0) {
+    sensoresContenedor.innerHTML = '<p class="text-muted">Este nodo no tiene sensores registrados.</p>';
+    return;
   }
+
+  sensores.forEach((sensor, index) => {
+    const checkbox = document.createElement('div');
+    checkbox.className = 'form-check mb-2';
+
+    checkbox.innerHTML = `
+      <input class="form-check-input" type="checkbox" value="${sensor.tipo_dato}" id="sensor-${index}">
+      <label class="form-check-label" for="sensor-${index}">
+        ${sensor.nombre} (${sensor.tipo_dato} - ${sensor.analogico_digital})
+      </label>
+    `;
+
+    sensoresContenedor.appendChild(checkbox);
+  });
+}
 
   // Lógica de filtros en cascada
   selectPais.addEventListener('change', () => {
