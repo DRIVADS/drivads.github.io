@@ -232,104 +232,116 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap" style="overflow-y: auto; max-height: 100vh;">
-	  <div class="row">
-			<!-- FORMULARIO DE UBICACIÓN -->
-			<div class="col-12 mb-3">
-			  <div class="card">
-				<div class="card-body">
-				  <h5 class="card-title">Buscar Nodo por Ubicación</h5>
-				  <form id="busqueda-form" class="row g-3 needs-validation" novalidate>
-					<div class="col-md-3">
-					  <label for="pais" class="form-label">País</label>
-					  <select class="form-select" id="pais" required></select>
-					</div>
-					<div class="col-md-3">
-					  <label for="estado" class="form-label">Estado</label>
-					  <select class="form-select" id="estado" required></select>
-					</div>
-					<div class="col-md-3">
-					  <label for="municipio" class="form-label">Municipio</label>
-					  <select class="form-select" id="municipio" required></select>
-					</div>
-					<div class="col-md-3">
-					  <label for="localidad" class="form-label">Localidad</label>
-					  <select class="form-select" id="localidad" required></select>
-					</div>
-					<div class="col-md-3">
-					  <button type="submit" class="btn btn-primary w-100">Buscar Nodos</button>
-					</div>
-				  </form>
+  <main style="overflow-y: auto; max-height: 100vh; width: 100vw; padding: 1rem;">
+  <div class="container-fluid px-0">
+    <div class="row gx-0">
+      <!-- PANEL DE CONTROL COMPLETO -->
+      <div class="col-12 mb-3">
+        <div class="card">
+          <div class="card-body">
 
-				  <hr>
-				  <div class="d-flex justify-content-between align-items-center">
-					<h5 class="card-title mb-0">Resultados</h5>
-					<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
-					  Mostrar / Ocultar
-					</button>
-				  </div>
-					  <div id="collapseResultadosContent" class="collapse show mt-2" style="max-height: 300px; overflow-y: auto;">
-					  <ul class="list-group" id="resultado-lista">
-						<li class="list-group-item">Usa los filtros para ver los nodos.</li>
-					  </ul>
-					</div>
+            <!-- FORMULARIO DE UBICACIÓN -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+			  <h5 class="card-title mb-0">Buscar Nodo por Ubicación</h5>
+			  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseFormularioUbicacion" aria-expanded="true">
+				Mostrar / Ocultar
+			  </button>
+			</div>
+
+			<div id="collapseFormularioUbicacion" class="collapse show">
+			  <form id="busqueda-form" class="row g-3 needs-validation mb-4" novalidate>
+				<div class="col-md-3">
+				  <label for="pais" class="form-label">País</label>
+				  <select class="form-select" id="pais" required>
+					<option value="">Seleccionar...</option>
+				  </select>
 				</div>
-			  </div>
-			</div>
-
-			<!-- SENSORES -->
-			<div class="col-12 mb-3">
-			  <div class="card">
-				<div class="card-body">
-				  <div class="d-flex justify-content-between align-items-center">
-					<h5 class="card-title mb-0">Sensores del Nodo</h5>
-					<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseSensores">
-					  Mostrar / Ocultar
-					</button>
-				  </div>
-				  <div id="collapseSensores" class="collapse show mt-2">
-					<div class="row">
-					  <div class="col-md-12" id="sensores-contenedor"></div>
-					</div>
-				  </div>
+				<div class="col-md-3">
+				  <label for="estado" class="form-label">Estado</label>
+				  <select class="form-select" id="estado" required>
+					<option value="">Seleccionar...</option>
+				  </select>
 				</div>
-			  </div>
-			</div>
-
-			<!-- FORMULARIO DE FECHA Y CONTAMINANTES -->
-			<div class="col-12 mb-3">
-			  <div class="card">
-				<div class="card-body">
-				  <h5 class="card-title">Filtrar por Fecha y Contaminantes</h5>
-				  <form id="filtro-monitoreo-form" class="row g-3">
-					<div class="col-md-3">
-					  <label for="fecha-inicio" class="form-label">Fecha Inicio</label>
-					  <input type="date" class="form-control" id="fecha-inicio" required>
-					</div>
-					<div class="col-md-3">
-					  <label for="fecha-fin" class="form-label">Fecha Fin</label>
-					  <input type="date" class="form-control" id="fecha-fin" required>
-					</div>
-					<div class="col-12">
-					  <div class="row" id="checkbox-contaminantes"></div>
-					</div>
-					<div class="col-md-3">
-					  <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
-					</div>
-				  </form>
+				<div class="col-md-3">
+				  <label for="municipio" class="form-label">Municipio</label>
+				  <select class="form-select" id="municipio" required>
+					<option value="">Seleccionar...</option>
+				  </select>
 				</div>
-			  </div>
+				<div class="col-md-3">
+				  <label for="localidad" class="form-label">Localidad</label>
+				  <select class="form-select" id="localidad" required>
+					<option value="">Seleccionar...</option>
+				  </select>
+				</div>
+				<div class="col-md-3">
+				  <button type="submit" class="btn btn-primary w-100">Buscar Nodos</button>
+				</div>
+			  </form>
 			</div>
+			<hr>
 
-			<!-- GRÁFICAS -->
-			<div class="col-12">
-			  <div class="row" id="charts-row">
-				<!-- Gráficas generadas dinámicamente -->
-			  </div>
-			</div>
-		  </div>
-  
-  </main>
+            <!-- RESULTADOS DE NODOS -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title mb-0">Resultados</h5>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
+                Mostrar / Ocultar
+              </button>
+            </div>
+            <div id="collapseResultadosContent" class="collapse show mb-4" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group" id="resultado-lista">
+                <li class="list-group-item">Usa los filtros para ver los nodos.</li>
+              </ul>
+            </div>
+			<hr>
+
+            <!-- SENSORES -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title mb-0">Sensores del Nodo</h5>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseSensores">
+                Mostrar / Ocultar
+              </button>
+            </div>
+            <div id="collapseSensores" class="collapse show mb-4">
+              <div class="row">
+                <div class="col-md-12" id="sensores-contenedor"></div>
+              </div>
+            </div>
+			<hr>
+
+            <!-- FORMULARIO DE FECHA Y CONTAMINANTES -->
+            <h5 class="card-title">Filtrar por Fecha y Contaminantes</h5>
+            <form id="filtro-monitoreo-form" class="row g-3">
+              <div class="col-md-3">
+                <label for="fecha-inicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fecha-inicio" required>
+              </div>
+              <div class="col-md-3">
+                <label for="fecha-fin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fecha-fin" required>
+              </div>
+              <div class="col-12">
+                <div class="row" id="checkbox-contaminantes"></div>
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
+              </div>
+            </form>
+
+          </div> <!-- card-body -->
+        </div> <!-- card -->
+      </div> <!-- col-12 -->
+
+      <!-- GRÁFICAS -->
+      <div class="col-12">
+        <div class="row" id="charts-row">
+          <!-- Gráficas generadas dinámicamente -->
+        </div>
+      </div>
+    </div> <!-- row -->
+  </div> <!-- container-fluid -->
+</main>
+
 	
 <script>
   const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
