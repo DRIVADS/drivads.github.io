@@ -313,7 +313,7 @@
                   <input type="date" class="form-control" id="fecha-fin" required>
                 </div>
                 <div class="col-12">
-                  <div class="row" id="checkbox-contaminantes"></div>
+                  <div class="row mx-3" id="checkbox-contaminantes"></div>
                 </div>
                 <div class="col-md-3">
 				  <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
@@ -403,7 +403,7 @@ async function obtenerDatosUbicacion(filtro = {}) {
       const li = document.createElement('li');
       li.className = 'list-group-item list-group-item-action';
       li.style.cursor = 'pointer';
-      li.textContent = `${nodo.nombre} (${nodo.coordenadas || 'Sin coordenadas'})`;
+      li.textContent = `${nodo.nombre} (${nodo.cordenadas || 'Sin coordenadas'})`;
 
       li.addEventListener('click', async () => {
         localStorage.setItem('nodoSeleccionado', nodo.id_nodo);
