@@ -316,8 +316,11 @@
                   <div class="row" id="checkbox-contaminantes"></div>
                 </div>
                 <div class="col-md-3">
-                  <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
-                </div>
+				  <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
+				</div>
+				<div class="col-md-3">
+				  <button id="btn-descargar-csv" type="button" class="btn btn-outline-primary w-100">Descargar CSV</button>
+				</div>
               </form>
             </div>
           </div> <!-- card-body -->
@@ -347,6 +350,7 @@ const resultadoLista = document.getElementById('resultado-lista');
 const filtroMonitoreoForm = document.getElementById('filtro-monitoreo-form');
 const checkboxContaminantes = document.getElementById('checkbox-contaminantes');
 const chartsRow = document.getElementById('charts-row');
+const btnDescargarCSV = document.getElementById('btn-descargar-csv');
 
 let zonasDisponibles = [];
 
@@ -487,6 +491,8 @@ filtroMonitoreoForm.addEventListener('submit', async e => {
     if (!res.ok) throw new Error('Error al obtener datos');
     const monitoreos = await res.json();
 
+    window.monitoreosFiltrados = monitoreos;
+
     if (!monitoreos.length) {
       chartsRow.innerHTML = '<p class="text-muted">No hay datos en ese rango.</p>';
       return;
@@ -550,6 +556,47 @@ filtroMonitoreoForm.addEventListener('submit', async e => {
     chartsRow.innerHTML = '<p class="text-danger">Error al generar gráficas.</p>';
   }
 });
+
+document.getElementById('btn-descargar-csv').addEventListener('click', () => {
+  if (window.monitoreosFiltrados) {
+    descargarCSVDeMonitoreos(window.monitoreosFiltrados);
+  } else {
+    alert('Primero realiza una búsqueda con el filtro.');
+  }
+});
+
+function descargarCSVDeMonitoreos(monitoreos) {
+  if (!monitoreos.length) return alert('No hay datos para descargar.');
+
+  const encabezados = ['id_monitoreo', 'id_nodo', 'fecha', 'hora', 'tipo', 'valor'];
+  const filas = [];
+
+  monitoreos.forEach(m => {
+    m.Datos.forEach(d => {
+      filas.push([
+        m.id_monitoreo,
+        m.id_nodo,
+        m.fecha,
+        m.hora,
+        d.tipo,
+        d.valor
+      ]);
+    });
+  });
+
+  let csvContent = encabezados.join(',') + '\n';
+  csvContent += filas.map(fila => fila.map(val => `"${val}"`).join(',')).join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'monitoreo.csv');
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 obtenerZonas();
 </script>
