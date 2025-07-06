@@ -235,7 +235,6 @@
   <main style="overflow-y: auto; max-height: 100vh; width: 100vw; padding: 1rem;">
   <div class="container-fluid px-0">
     <div class="row gx-0">
-      <!-- PANEL DE CONTROL COMPLETO -->
       <div class="col-12 mb-3">
         <div class="card">
           <div class="card-body">
@@ -349,172 +348,249 @@
   </div> <!-- container-fluid -->
 </main>
 
-	
 <script>
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-  const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
-  const selectPais = document.getElementById('pais');
-  const selectEstado = document.getElementById('estado');
-  const selectMunicipio = document.getElementById('municipio');
-  const selectLocalidad = document.getElementById('localidad');
-  const formBusqueda = document.getElementById('busqueda-form');
-  const resultadoLista = document.getElementById('resultado-lista');
-  const sensoresContenedor = document.getElementById('sensores-contenedor');
+const selectPais = document.getElementById('pais');
+const selectEstado = document.getElementById('estado');
+const selectMunicipio = document.getElementById('municipio');
+const selectLocalidad = document.getElementById('localidad');
+const formBusqueda = document.getElementById('busqueda-form');
+const resultadoLista = document.getElementById('resultado-lista');
+const sensoresContenedor = document.getElementById('sensores-contenedor');
+const filtroMonitoreoForm = document.getElementById('filtro-monitoreo-form');
+const checkboxContaminantes = document.getElementById('checkbox-contaminantes');
+const chartsRow = document.getElementById('charts-row');
 
-  let zonasDisponibles = [];
+let zonasDisponibles = [];
 
-  function llenarSelect(select, items) {
-    select.innerHTML = '<option value="">Seleccionar...</option>';
-    [...new Set(items)]
-      .filter(Boolean)
-      .sort()
-      .forEach(item => {
-        const option = document.createElement('option');
-        option.value = item;
-        option.textContent = item;
-        select.appendChild(option);
-      });
+function llenarSelect(select, items) {
+  select.innerHTML = '<option value="">Seleccionar...</option>';
+  [...new Set(items)].filter(Boolean).sort().forEach(item => {
+    const option = document.createElement('option');
+    option.value = item;
+    option.textContent = item;
+    select.appendChild(option);
+  });
+}
+
+async function obtenerZonas() {
+  try {
+    const res = await fetch(`${apiBase}/api/zonas`);
+    if (!res.ok) throw new Error('Error al obtener zonas');
+    zonasDisponibles = await res.json();
+    const paises = zonasDisponibles.map(z => z.pais);
+    llenarSelect(selectPais, paises);
+  } catch (error) {
+    console.error('Error al cargar zonas:', error);
   }
+}
 
-  async function obtenerZonas() {
-    try {
-      const res = await fetch(`${apiBase}/api/zonas`);
-      if (!res.ok) throw new Error('Error al obtener zonas');
-      zonasDisponibles = await res.json();
-      const paises = zonasDisponibles.map(z => z.pais);
-      llenarSelect(selectPais, paises);
-    } catch (error) {
-      console.error('Error al cargar zonas:', error);
-    }
-  }
+async function obtenerDatosUbicacion(filtro = {}) {
+  try {
+    const res = await fetch(`${apiBase}/api/nodos`);
+    if (!res.ok) throw new Error('Error al obtener nodos');
+    const nodos = await res.json();
 
-  async function obtenerDatosUbicacion(filtro = {}) {
-    try {
-      const res = await fetch(`${apiBase}/api/nodos`);
-      if (!res.ok) throw new Error('Error al obtener nodos');
-      const nodos = await res.json();
+    const mapaZonas = new Map(zonasDisponibles.map(z => [z.id_zona || z._id, z]));
 
-      const mapaZonas = new Map(zonasDisponibles.map(z => [z.id_zona || z._id, z]));
+    const nodosFiltrados = nodos.filter(nodo => {
+      const zona = mapaZonas.get(nodo.id_zona) || {};
+      return (!filtro.pais || zona.pais === filtro.pais) &&
+             (!filtro.estado || zona.estado === filtro.estado) &&
+             (!filtro.municipio || zona.municipio === filtro.municipio) &&
+             (!filtro.localidad || zona.localidad === filtro.localidad);
+    });
 
-      const nodosFiltrados = nodos.filter(nodo => {
-        const zona = mapaZonas.get(nodo.id_zona) || {};
-        return (!filtro.pais || zona.pais === filtro.pais) &&
-          (!filtro.estado || zona.estado === filtro.estado) &&
-          (!filtro.municipio || zona.municipio === filtro.municipio) &&
-          (!filtro.localidad || zona.localidad === filtro.localidad);
-      });
-
-      resultadoLista.innerHTML = '';
-      sensoresContenedor.innerHTML = '';
-
-      if (nodosFiltrados.length === 0) {
-        resultadoLista.innerHTML = '<li class="list-group-item">No se encontraron nodos con esos filtros.</li>';
-        return;
-      }
-
-      nodosFiltrados.forEach(nodo => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item list-group-item-action';
-        li.style.cursor = 'pointer';
-        li.textContent = `${nodo.nombre} (${nodo.coordenadas ? nodo.coordenadas.join(', ') : 'Sin coordenadas'})`;
-        li.addEventListener('click', async () => {
-          localStorage.setItem('nodoSeleccionado', nodo.id_nodo);
-
-          try {
-            const resMonitoreos = await fetch(`${apiBase}/api/monitoreos?id_nodo=${encodeURIComponent(nodo.id_nodo)}`);
-            if (!resMonitoreos.ok) throw new Error('Error al obtener monitoreos');
-            const monitoreos = await resMonitoreos.json();
-
-            if (monitoreos.length === 0) {
-              sensoresContenedor.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
-              return;
-            }
-
-            const monitoreoReciente = monitoreos[monitoreos.length - 1];
-
-            renderizarSensores(monitoreoReciente);
-
-          } catch (error) {
-            console.error('Error al obtener monitoreos:', error);
-            sensoresContenedor.innerHTML = '<p class="text-danger">Error al cargar datos de monitoreo.</p>';
-          }
-        });
-        resultadoLista.appendChild(li);
-      });
-
-    } catch (error) {
-      console.error('Error al obtener nodos:', error);
-    }
-  }
-
-  function renderizarSensores(monitoreo) {
+    resultadoLista.innerHTML = '';
     sensoresContenedor.innerHTML = '';
+    checkboxContaminantes.innerHTML = '';
 
-    if (!monitoreo || !Array.isArray(monitoreo.Datos) || monitoreo.Datos.length === 0) {
-      sensoresContenedor.innerHTML = '<p class="text-muted">Este nodo no tiene datos de monitoreo disponibles.</p>';
+    if (nodosFiltrados.length === 0) {
+      resultadoLista.innerHTML = '<li class="list-group-item">No se encontraron nodos con esos filtros.</li>';
       return;
     }
 
-    const tiposUnicos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
+    nodosFiltrados.forEach(nodo => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item list-group-item-action';
+      li.style.cursor = 'pointer';
+      li.textContent = `${nodo.nombre} (${nodo.coordenadas || 'Sin coordenadas'})`;
 
-    tiposUnicos.forEach((tipo, index) => {
-      const checkbox = document.createElement('div');
-      checkbox.className = 'form-check mb-2';
+      li.addEventListener('click', async () => {
+        localStorage.setItem('nodoSeleccionado', nodo.id_nodo);
+        try {
+          const resMonitoreos = await fetch(`${apiBase}/api/monitoreos?id_nodo=${encodeURIComponent(nodo.id_nodo)}`);
+          if (!resMonitoreos.ok) throw new Error('Error al obtener monitoreos');
+          const monitoreos = await resMonitoreos.json();
 
-      checkbox.innerHTML = `
-        <input class="form-check-input" type="checkbox" value="${tipo}" id="sensor-${index}">
-        <label class="form-check-label" for="sensor-${index}">
-          ${tipo}
-        </label>
-      `;
+          if (monitoreos.length === 0) {
+            sensoresContenedor.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
+            checkboxContaminantes.innerHTML = '';
+            return;
+          }
 
-      sensoresContenedor.appendChild(checkbox);
+          const monitoreoReciente = monitoreos[monitoreos.length - 1];
+          renderizarSensores(monitoreoReciente);
+          renderizarCheckboxContaminantes(monitoreoReciente);
+
+        } catch (error) {
+          console.error('Error al obtener monitoreos:', error);
+          sensoresContenedor.innerHTML = '<p class="text-danger">Error al cargar datos de monitoreo.</p>';
+          checkboxContaminantes.innerHTML = '';
+        }
+      });
+
+      resultadoLista.appendChild(li);
     });
+
+  } catch (error) {
+    console.error('Error al obtener nodos:', error);
+  }
+}
+
+function renderizarSensores(monitoreo) {
+  sensoresContenedor.innerHTML = '';
+  if (!monitoreo || !Array.isArray(monitoreo.Datos)) return;
+
+  const tipos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
+  tipos.forEach((tipo, index) => {
+    const div = document.createElement('div');
+    div.className = 'form-check mb-2';
+    div.innerHTML = `
+      <input class="form-check-input" type="checkbox" value="${tipo}" id="sensor-${index}">
+      <label class="form-check-label" for="sensor-${index}">${tipo}</label>
+    `;
+    sensoresContenedor.appendChild(div);
+  });
+}
+
+function renderizarCheckboxContaminantes(monitoreo) {
+  checkboxContaminantes.innerHTML = '';
+  if (!monitoreo || !Array.isArray(monitoreo.Datos)) return;
+
+  const tipos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
+  tipos.forEach((tipo, index) => {
+    const div = document.createElement('div');
+    div.className = 'form-check col-md-2 mb-2';
+    div.innerHTML = `
+      <input class="form-check-input" type="checkbox" value="${tipo}" id="contaminante-${index}" checked>
+      <label class="form-check-label" for="contaminante-${index}">${tipo}</label>
+    `;
+    checkboxContaminantes.appendChild(div);
+  });
+}
+
+selectPais.addEventListener('change', () => {
+  const estados = zonasDisponibles.filter(z => z.pais === selectPais.value).map(z => z.estado);
+  llenarSelect(selectEstado, estados);
+  selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
+  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+});
+
+selectEstado.addEventListener('change', () => {
+  const municipios = zonasDisponibles.filter(z =>
+    z.pais === selectPais.value && z.estado === selectEstado.value).map(z => z.municipio);
+  llenarSelect(selectMunicipio, municipios);
+  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+});
+
+selectMunicipio.addEventListener('change', () => {
+  const localidades = zonasDisponibles.filter(z =>
+    z.pais === selectPais.value && z.estado === selectEstado.value &&
+    z.municipio === selectMunicipio.value).map(z => z.localidad);
+  llenarSelect(selectLocalidad, localidades);
+});
+
+formBusqueda.addEventListener('submit', e => {
+  e.preventDefault();
+  obtenerDatosUbicacion({
+    pais: selectPais.value,
+    estado: selectEstado.value,
+    municipio: selectMunicipio.value,
+    localidad: selectLocalidad.value
+  });
+});
+
+filtroMonitoreoForm.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const nodoSeleccionado = localStorage.getItem('nodoSeleccionado');
+  if (!nodoSeleccionado) {
+    alert('Selecciona un nodo primero.');
+    return;
   }
 
-  // Lógica de filtros en cascada
-  selectPais.addEventListener('change', () => {
-    const estados = zonasDisponibles
-      .filter(z => z.pais === selectPais.value)
-      .map(z => z.estado);
-    llenarSelect(selectEstado, estados);
-    selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
-    selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-  });
+  const fechaInicio = document.getElementById('fecha-inicio').value;
+  const fechaFin = document.getElementById('fecha-fin').value;
 
-  selectEstado.addEventListener('change', () => {
-    const municipios = zonasDisponibles
-      .filter(z => z.pais === selectPais.value && z.estado === selectEstado.value)
-      .map(z => z.municipio);
-    llenarSelect(selectMunicipio, municipios);
-    selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-  });
+  if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
+    alert('La fecha de inicio no puede ser mayor que la final.');
+    return;
+  }
 
-  selectMunicipio.addEventListener('change', () => {
-    const localidades = zonasDisponibles
-      .filter(z =>
-        z.pais === selectPais.value &&
-        z.estado === selectEstado.value &&
-        z.municipio === selectMunicipio.value)
-      .map(z => z.localidad);
-    llenarSelect(selectLocalidad, localidades);
-  });
+  let url = `${apiBase}/api/monitoreos?id_nodo=${encodeURIComponent(nodoSeleccionado)}`;
+  if (fechaInicio) url += `&fecha_ini=${encodeURIComponent(fechaInicio)}`;
+  if (fechaFin) url += `&fecha_fin=${encodeURIComponent(fechaFin)}`;
 
-  // Evento de envío del formulario
-  formBusqueda.addEventListener('submit', e => {
-    e.preventDefault();
-    obtenerDatosUbicacion({
-      pais: selectPais.value || null,
-      estado: selectEstado.value || null,
-      municipio: selectMunicipio.value || null,
-      localidad: selectLocalidad.value || null
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Error al obtener monitoreos');
+    const monitoreos = await res.json();
+
+    if (monitoreos.length === 0) {
+      chartsRow.innerHTML = '<p class="text-muted">No hay datos en ese rango de fechas.</p>';
+      return;
+    }
+
+    const tiposSeleccionados = Array.from(
+      checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')
+    ).map(c => c.value);
+
+    if (tiposSeleccionados.length === 0) {
+      alert('Selecciona al menos un contaminante.');
+      return;
+    }
+
+    const datosParaGrafica = monitoreos.map(m => {
+      const obj = { fecha_hora: `${m.fecha} ${m.hora}` };
+      tiposSeleccionados.forEach(tipo => {
+        const d = m.Datos.find(dd => dd.tipo === tipo);
+        obj[tipo] = d ? parseFloat(d.valor) || 0 : 0;
+      });
+      return obj;
     });
-  });
 
-  // Inicializar
-  obtenerZonas();
+    chartsRow.innerHTML = '';
+    const grafDiv = document.createElement('div');
+    grafDiv.id = 'grafica-monitoreo';
+    grafDiv.style.height = '300px';
+    chartsRow.appendChild(grafDiv);
+
+    new Morris.Line({
+      element: 'grafica-monitoreo',
+      data: datosParaGrafica,
+      xkey: 'fecha_hora',
+      ykeys: tiposSeleccionados,
+      labels: tiposSeleccionados.map(t => t.toUpperCase()),
+      parseTime: false,
+      lineColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240'],
+      resize: true
+    });
+
+  } catch (error) {
+    console.error('Error en monitoreo por fecha:', error);
+    chartsRow.innerHTML = '<p class="text-danger">Error al generar gráfica.</p>';
+  }
+});
+
+obtenerZonas();
 </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
 						
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
