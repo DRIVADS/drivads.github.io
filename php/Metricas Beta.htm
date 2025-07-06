@@ -380,8 +380,7 @@ async function obtenerZonas() {
     const res = await fetch(`${apiBase}/api/zonas`);
     if (!res.ok) throw new Error('Error al obtener zonas');
     zonasDisponibles = await res.json();
-    const paises = zonasDisponibles.map(z => z.pais);
-    llenarSelect(selectPais, paises);
+    llenarSelect(selectPais, zonasDisponibles.map(z => z.pais));
   } catch (error) {
     console.error('Error al cargar zonas:', error);
   }
@@ -421,24 +420,18 @@ async function obtenerDatosUbicacion(filtro = {}) {
       li.addEventListener('click', async () => {
         localStorage.setItem('nodoSeleccionado', nodo.id_nodo);
         try {
-          const resMonitoreos = await fetch(`${apiBase}/api/monitoreos?id_nodo=${encodeURIComponent(nodo.id_nodo)}`);
+          const resMonitoreos = await fetch(`${apiBase}/api/monitoreos?id_nodo=${nodo.id_nodo}`);
           if (!resMonitoreos.ok) throw new Error('Error al obtener monitoreos');
           const monitoreos = await resMonitoreos.json();
-
           if (monitoreos.length === 0) {
             sensoresContenedor.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
             checkboxContaminantes.innerHTML = '';
             return;
           }
-
           const monitoreoReciente = monitoreos[monitoreos.length - 1];
-          renderizarSensores(monitoreoReciente);
           renderizarCheckboxContaminantes(monitoreoReciente);
-
         } catch (error) {
           console.error('Error al obtener monitoreos:', error);
-          sensoresContenedor.innerHTML = '<p class="text-danger">Error al cargar datos de monitoreo.</p>';
-          checkboxContaminantes.innerHTML = '';
         }
       });
 
@@ -446,24 +439,8 @@ async function obtenerDatosUbicacion(filtro = {}) {
     });
 
   } catch (error) {
-    console.error('Error al obtener nodos:', error);
+    console.error('Error:', error);
   }
-}
-
-function renderizarSensores(monitoreo) {
-  sensoresContenedor.innerHTML = '';
-  if (!monitoreo || !Array.isArray(monitoreo.Datos)) return;
-
-  const tipos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
-  tipos.forEach((tipo, index) => {
-    const div = document.createElement('div');
-    div.className = 'form-check mb-2';
-    div.innerHTML = `
-      <input class="form-check-input" type="checkbox" value="${tipo}" id="sensor-${index}">
-      <label class="form-check-label" for="sensor-${index}">${tipo}</label>
-    `;
-    sensoresContenedor.appendChild(div);
-  });
 }
 
 function renderizarCheckboxContaminantes(monitoreo) {
@@ -471,17 +448,18 @@ function renderizarCheckboxContaminantes(monitoreo) {
   if (!monitoreo || !Array.isArray(monitoreo.Datos)) return;
 
   const tipos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
-  tipos.forEach((tipo, index) => {
+  tipos.forEach((tipo, i) => {
     const div = document.createElement('div');
     div.className = 'form-check col-md-2 mb-2';
     div.innerHTML = `
-      <input class="form-check-input" type="checkbox" value="${tipo}" id="contaminante-${index}" checked>
-      <label class="form-check-label" for="contaminante-${index}">${tipo}</label>
+      <input class="form-check-input" type="checkbox" value="${tipo}" id="contaminante-${i}" checked>
+      <label class="form-check-label" for="contaminante-${i}">${tipo}</label>
     `;
     checkboxContaminantes.appendChild(div);
   });
 }
 
+// Cascada filtros ubicación
 selectPais.addEventListener('change', () => {
   const estados = zonasDisponibles.filter(z => z.pais === selectPais.value).map(z => z.estado);
   llenarSelect(selectEstado, estados);
@@ -490,19 +468,17 @@ selectPais.addEventListener('change', () => {
 });
 
 selectEstado.addEventListener('change', () => {
-  const municipios = zonasDisponibles.filter(z =>
-    z.pais === selectPais.value && z.estado === selectEstado.value).map(z => z.municipio);
+  const municipios = zonasDisponibles.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value).map(z => z.municipio);
   llenarSelect(selectMunicipio, municipios);
   selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
 });
 
 selectMunicipio.addEventListener('change', () => {
-  const localidades = zonasDisponibles.filter(z =>
-    z.pais === selectPais.value && z.estado === selectEstado.value &&
-    z.municipio === selectMunicipio.value).map(z => z.localidad);
+  const localidades = zonasDisponibles.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value && z.municipio === selectMunicipio.value).map(z => z.localidad);
   llenarSelect(selectLocalidad, localidades);
 });
 
+// Buscar nodos
 formBusqueda.addEventListener('submit', e => {
   e.preventDefault();
   obtenerDatosUbicacion({
@@ -513,80 +489,94 @@ formBusqueda.addEventListener('submit', e => {
   });
 });
 
+// Ver monitoreo y graficar
 filtroMonitoreoForm.addEventListener('submit', async e => {
   e.preventDefault();
 
   const nodoSeleccionado = localStorage.getItem('nodoSeleccionado');
-  if (!nodoSeleccionado) {
-    alert('Selecciona un nodo primero.');
-    return;
-  }
+  if (!nodoSeleccionado) return alert('Selecciona un nodo primero.');
 
   const fechaInicio = document.getElementById('fecha-inicio').value;
   const fechaFin = document.getElementById('fecha-fin').value;
 
-  if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
-    alert('La fecha de inicio no puede ser mayor que la final.');
-    return;
-  }
-
-  let url = `${apiBase}/api/monitoreos?id_nodo=${encodeURIComponent(nodoSeleccionado)}`;
-  if (fechaInicio) url += `&fecha_ini=${encodeURIComponent(fechaInicio)}`;
-  if (fechaFin) url += `&fecha_fin=${encodeURIComponent(fechaFin)}`;
+  let url = `${apiBase}/api/monitoreos?id_nodo=${nodoSeleccionado}`;
+  if (fechaInicio) url += `&fecha_ini=${fechaInicio}`;
+  if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Error al obtener monitoreos');
+    if (!res.ok) throw new Error('Error al obtener datos');
     const monitoreos = await res.json();
 
-    if (monitoreos.length === 0) {
-      chartsRow.innerHTML = '<p class="text-muted">No hay datos en ese rango de fechas.</p>';
+    if (!monitoreos.length) {
+      chartsRow.innerHTML = '<p class="text-muted">No hay datos en ese rango.</p>';
       return;
     }
 
-    const tiposSeleccionados = Array.from(
-      checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')
-    ).map(c => c.value);
+    const tipos = Array.from(checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    if (!tipos.length) return alert('Selecciona al menos un tipo de dato.');
 
-    if (tiposSeleccionados.length === 0) {
-      alert('Selecciona al menos un contaminante.');
-      return;
-    }
-
-    const datosParaGrafica = monitoreos.map(m => {
-      const obj = { fecha_hora: `${m.fecha} ${m.hora}` };
-      tiposSeleccionados.forEach(tipo => {
-        const d = m.Datos.find(dd => dd.tipo === tipo);
-        obj[tipo] = d ? parseFloat(d.valor) || 0 : 0;
+    const datos = monitoreos.map(m => {
+      const base = { fecha_hora: `${m.fecha} ${m.hora}` };
+      tipos.forEach(tipo => {
+        const encontrado = m.Datos.find(d => d.tipo === tipo);
+        base[tipo] = encontrado ? parseFloat(encontrado.valor) || 0 : 0;
       });
-      return obj;
+      return base;
     });
 
     chartsRow.innerHTML = '';
-    const grafDiv = document.createElement('div');
-    grafDiv.id = 'grafica-monitoreo';
-    grafDiv.style.height = '300px';
-    chartsRow.appendChild(grafDiv);
+    tipos.forEach(tipo => {
+      const col = document.createElement('div');
+		col.className = 'col-md-12 mb-4';
 
-    new Morris.Line({
-      element: 'grafica-monitoreo',
-      data: datosParaGrafica,
-      xkey: 'fecha_hora',
-      ykeys: tiposSeleccionados,
-      labels: tiposSeleccionados.map(t => t.toUpperCase()),
-      parseTime: false,
-      lineColors: ['#0b62a4', '#7a92a3', '#4da74d', '#afd8f8', '#edc240'],
-      resize: true
+		const card = document.createElement('div');
+		card.className = 'card shadow';
+
+		const cardBody = document.createElement('div');
+		cardBody.className = 'card-body';
+
+		const title = document.createElement('h6');
+		title.className = 'card-title';
+		title.textContent = `Gráfica de ${tipo.toUpperCase()}`;
+
+		const chartDiv = document.createElement('div');
+		chartDiv.id = `grafica-${tipo}`;
+		chartDiv.style.height = '300px';
+
+		cardBody.appendChild(title);
+		cardBody.appendChild(chartDiv);
+		card.appendChild(cardBody);
+		col.appendChild(card);
+		chartsRow.appendChild(col);
+
+
+      const tipoData = datos.map(d => ({
+        fecha_hora: d.fecha_hora,
+        valor: d[tipo]
+      }));
+
+      new Morris.Line({
+        element: chartDiv.id,
+        data: tipoData,
+        xkey: 'fecha_hora',
+        ykeys: ['valor'],
+        labels: [tipo.toUpperCase()],
+        parseTime: false,
+        lineColors: ['#0b62a4'],
+        resize: true
+      });
     });
 
-  } catch (error) {
-    console.error('Error en monitoreo por fecha:', error);
-    chartsRow.innerHTML = '<p class="text-danger">Error al generar gráfica.</p>';
+  } catch (err) {
+    console.error('Error al graficar:', err);
+    chartsRow.innerHTML = '<p class="text-danger">Error al generar gráficas.</p>';
   }
 });
 
 obtenerZonas();
 </script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
