@@ -294,20 +294,6 @@
             </div>
             <hr>
 
-            <!-- SENSORES -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="card-title mb-0">Sensores del Nodo</h5>
-              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseSensores">
-                Mostrar / Ocultar
-              </button>
-            </div>
-            <div id="collapseSensores" class="collapse show mb-4">
-              <div class="row">
-                <div class="col-md-12" id="sensores-contenedor"></div>
-              </div>
-            </div>
-            <hr>
-
             <!-- FORMULARIO DE FECHA Y CONTAMINANTES -->
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="card-title mb-0">Filtrar por Fecha y Contaminantes</h5>
@@ -358,7 +344,6 @@ const selectMunicipio = document.getElementById('municipio');
 const selectLocalidad = document.getElementById('localidad');
 const formBusqueda = document.getElementById('busqueda-form');
 const resultadoLista = document.getElementById('resultado-lista');
-const sensoresContenedor = document.getElementById('sensores-contenedor');
 const filtroMonitoreoForm = document.getElementById('filtro-monitoreo-form');
 const checkboxContaminantes = document.getElementById('checkbox-contaminantes');
 const chartsRow = document.getElementById('charts-row');
@@ -403,7 +388,6 @@ async function obtenerDatosUbicacion(filtro = {}) {
     });
 
     resultadoLista.innerHTML = '';
-    sensoresContenedor.innerHTML = '';
     checkboxContaminantes.innerHTML = '';
 
     if (nodosFiltrados.length === 0) {
@@ -424,8 +408,7 @@ async function obtenerDatosUbicacion(filtro = {}) {
           if (!resMonitoreos.ok) throw new Error('Error al obtener monitoreos');
           const monitoreos = await resMonitoreos.json();
           if (monitoreos.length === 0) {
-            sensoresContenedor.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
-            checkboxContaminantes.innerHTML = '';
+            checkboxContaminantes.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
             return;
           }
           const monitoreoReciente = monitoreos[monitoreos.length - 1];
@@ -459,7 +442,6 @@ function renderizarCheckboxContaminantes(monitoreo) {
   });
 }
 
-// Cascada filtros ubicación
 selectPais.addEventListener('change', () => {
   const estados = zonasDisponibles.filter(z => z.pais === selectPais.value).map(z => z.estado);
   llenarSelect(selectEstado, estados);
@@ -478,7 +460,6 @@ selectMunicipio.addEventListener('change', () => {
   llenarSelect(selectLocalidad, localidades);
 });
 
-// Buscar nodos
 formBusqueda.addEventListener('submit', e => {
   e.preventDefault();
   obtenerDatosUbicacion({
@@ -489,10 +470,8 @@ formBusqueda.addEventListener('submit', e => {
   });
 });
 
-// Ver monitoreo y graficar
 filtroMonitoreoForm.addEventListener('submit', async e => {
   e.preventDefault();
-
   const nodoSeleccionado = localStorage.getItem('nodoSeleccionado');
   if (!nodoSeleccionado) return alert('Selecciona un nodo primero.');
 
@@ -513,12 +492,12 @@ filtroMonitoreoForm.addEventListener('submit', async e => {
       return;
     }
 
-    const tipos = Array.from(checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-    if (!tipos.length) return alert('Selecciona al menos un tipo de dato.');
+    const tiposSeleccionados = Array.from(checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    if (!tiposSeleccionados.length) return alert('Selecciona al menos un tipo de dato.');
 
-    const datos = monitoreos.map(m => {
+    const datosParaGrafica = monitoreos.map(m => {
       const base = { fecha_hora: `${m.fecha} ${m.hora}` };
-      tipos.forEach(tipo => {
+      tiposSeleccionados.forEach(tipo => {
         const encontrado = m.Datos.find(d => d.tipo === tipo);
         base[tipo] = encontrado ? parseFloat(encontrado.valor) || 0 : 0;
       });
@@ -526,39 +505,38 @@ filtroMonitoreoForm.addEventListener('submit', async e => {
     });
 
     chartsRow.innerHTML = '';
-    tipos.forEach(tipo => {
+    tiposSeleccionados.forEach((tipo) => {
       const col = document.createElement('div');
-		col.className = 'col-md-12 mb-4';
+      col.className = 'col-md-12 mb-4';
 
-		const card = document.createElement('div');
-		card.className = 'card shadow';
+      const card = document.createElement('div');
+      card.className = 'card shadow';
 
-		const cardBody = document.createElement('div');
-		cardBody.className = 'card-body';
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body';
 
-		const title = document.createElement('h6');
-		title.className = 'card-title';
-		title.textContent = `Gráfica de ${tipo.toUpperCase()}`;
+      const title = document.createElement('h6');
+      title.className = 'card-title';
+      title.textContent = `Gráfica de ${tipo.toUpperCase()}`;
 
-		const chartDiv = document.createElement('div');
-		chartDiv.id = `grafica-${tipo}`;
-		chartDiv.style.height = '300px';
+      const chartDiv = document.createElement('div');
+      chartDiv.id = `grafica-${tipo}`;
+      chartDiv.style.height = '300px';
 
-		cardBody.appendChild(title);
-		cardBody.appendChild(chartDiv);
-		card.appendChild(cardBody);
-		col.appendChild(card);
-		chartsRow.appendChild(col);
+      cardBody.appendChild(title);
+      cardBody.appendChild(chartDiv);
+      card.appendChild(cardBody);
+      col.appendChild(card);
+      chartsRow.appendChild(col);
 
-
-      const tipoData = datos.map(d => ({
+      const datosTipo = datosParaGrafica.map(d => ({
         fecha_hora: d.fecha_hora,
         valor: d[tipo]
       }));
 
       new Morris.Line({
         element: chartDiv.id,
-        data: tipoData,
+        data: datosTipo,
         xkey: 'fecha_hora',
         ykeys: ['valor'],
         labels: [tipo.toUpperCase()],
@@ -567,7 +545,6 @@ filtroMonitoreoForm.addEventListener('submit', async e => {
         resize: true
       });
     });
-
   } catch (err) {
     console.error('Error al graficar:', err);
     chartsRow.innerHTML = '<p class="text-danger">Error al generar gráficas.</p>';
