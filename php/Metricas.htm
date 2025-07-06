@@ -232,341 +232,400 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap">
-  
-  <div class="row m-3" >
-	  
-	<div class="col-sm-12 col-lg-12 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Selecciona Nodo</h5>
-			<form class="needs-validation" novalidate>
-			 <div class="row">
-			 <div class="col-sm-6 col-lg-3">
-              <label for="country" class="form-label">Estado</label>
-              <select class="form-select" id="estado" required>
-                <option value="">Seleccionar...</option>
-                <option>Jalisco</option>
-				<option>Chiapas</option>
-				<option>Yucatan</option>
-              </select>
-              <div class="invalid-feedback">
-                Porfavor selecciona un Estado.
-              </div>
+  <main style="overflow-y: auto; max-height: 100vh; width: 100vw; padding: 1rem;">
+  <div class="container-fluid px-0">
+    <div class="row gx-0">
+      <div class="col-12 mb-3">
+        <div class="card">
+          <div class="card-body">
+
+            <!-- FORMULARIO DE UBICACIÓN -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title mb-0">Buscar Nodo por Ubicación</h5>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseFormularioUbicacion" aria-expanded="true">
+                Mostrar / Ocultar
+              </button>
             </div>
 
-            <div class="col-sm-6 col-lg-3">
-              <label for="state" class="form-label">Municipio</label>
-              <select class="form-select" id="municipio" required>
-                <option value="">Seleccionar...</option>
-                <option>Tala</option>
-				<option>Ameca</option>
-              </select>
-              <div class="invalid-feedback">
-                Selecciona un Municipop.
-              </div>
-			</div>
-			
-			<div class="col-sm-6 col-lg-3">
-              <label for="state" class="form-label">Localidad</label>
-              <select class="form-select" id="localidad" required>
-                <option value="">Selecciona...</option>
-                <option>Ameca centro</option>
-				<option>Cuvalles</option>
-              </select>
-              <div class="invalid-feedback">
-                Please provide a valid state.
-              </div>
-			</div>
-				<div class="col-sm-6 col-lg-2 m-0">	
-			<button class="w-100 btn btn-primary btn-lg" type="submit">Seleccionar Nodo</button>
+            <div id="collapseFormularioUbicacion" class="collapse show">
+              <form id="busqueda-form" class="row g-3 needs-validation mb-4" novalidate>
+                <div class="col-md-3">
+                  <label for="pais" class="form-label">País</label>
+                  <select class="form-select" id="pais" required>
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="estado" class="form-label">Estado</label>
+                  <select class="form-select" id="estado" required>
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="municipio" class="form-label">Municipio</label>
+                  <select class="form-select" id="municipio" required>
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="localidad" class="form-label">Localidad</label>
+                  <select class="form-select" id="localidad" required>
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <button type="submit" class="btn btn-primary w-100">Buscar Nodos</button>
+                </div>
+              </form>
+            </div>
+            <hr>
+
+            <!-- RESULTADOS DE NODOS -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title mb-0">Resultados</h5>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseResultadosContent">
+                Mostrar / Ocultar
+              </button>
+            </div>
+            <div id="collapseResultadosContent" class="collapse show mb-4" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group" id="resultado-lista">
+                <li class="list-group-item">Usa los filtros para ver los nodos.</li>
+              </ul>
+            </div>
+            <hr>
+
+            <!-- FORMULARIO DE FECHA Y CONTAMINANTES -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="card-title mb-0">Filtrar por Fecha y Contaminantes</h5>
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseFiltroFecha" aria-expanded="true">
+                Mostrar / Ocultar
+              </button>
+            </div>
+
+            <div id="collapseFiltroFecha" class="collapse show">
+              <form id="filtro-monitoreo-form" class="row g-3">
+                <div class="col-md-3">
+                  <label for="fecha-inicio" class="form-label">Fecha Inicio</label>
+                  <input type="date" class="form-control" id="fecha-inicio" required>
+                </div>
+                <div class="col-md-3">
+                  <label for="fecha-fin" class="form-label">Fecha Fin</label>
+                  <input type="date" class="form-control" id="fecha-fin" required>
+                </div>
+                <div class="col-12">
+                  <div class="row mx-3" id="checkbox-contaminantes"></div>
+                </div>
+                <div class="col-md-3">
+				  <button type="submit" class="btn btn-success w-100">Ver Monitoreo</button>
 				</div>
-		      </div>
-        	</form>	
-			
-        </div>
-      </div>
-    </div>
-	<!-- Añadido scroll aquí -->
-	<div class="col-sm-12 col-lg-12 mb-3">
-    <div style="max-height: 400px; overflow-y: auto;">
-	  
-	<div class="row">	
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 1</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart1" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+				<div class="col-md-3">
+				  <button id="btn-descargar-csv" type="button" class="btn btn-outline-primary w-100">Descargar CSV</button>
+				</div>
+              </form>
+            </div>
+          </div> <!-- card-body -->
+        </div> <!-- card -->
+      </div> <!-- col-12 -->
 
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 2</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart2" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
+      <!-- GRÁFICAS -->
+      <div class="col-12">
+        <div class="row" id="charts-row">
+          <!-- Gráficas generadas dinámicamente -->
         </div>
       </div>
-    </div>
-	</div>
-	
-	<div class="row">
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 3</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart3" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 4</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart4" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-	
-	<div class="row">
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 5</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart5" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 6</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart6" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-	</div>
-		
-	<div class="row">
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 7</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart7" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 8</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart8" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
- </div>
-		
-	<div class="row">
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 9</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart9" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-6 mb-3">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Contaminante 10</h5>
-          <div class="col-lg-12">
-            <div id="myfirstchart10" class="col-lg-12" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-		
-   </div>
-  </div>
-  </div>
+    </div> <!-- row -->
+  </div> <!-- container-fluid -->
 </main>
-	
+
 <script>
-  new Morris.Line({
-    element: 'myfirstchart1',
-    data: [
-      { year: '2008', value: 10 },
-      { year: '2009', value: 20 },
-      { year: '2010', value: 15 },
-      { year: '2011', value: 25 },
-      { year: '2012', value: 30 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#FF5733']  <!-- Color Rojo -->
-  });
+	const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+	const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
-  new Morris.Line({
-    element: 'myfirstchart2',
-    data: [
-      { year: '2008', value: 30 },
-      { year: '2009', value: 35 },
-      { year: '2010', value: 25 },
-      { year: '2011', value: 30 },
-      { year: '2012', value: 40 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#33FF57']  <!-- Color Verde -->
-  });
+	const selectPais = document.getElementById('pais');
+	const selectEstado = document.getElementById('estado');
+	const selectMunicipio = document.getElementById('municipio');
+	const selectLocalidad = document.getElementById('localidad');
+	const formBusqueda = document.getElementById('busqueda-form');
+	const resultadoLista = document.getElementById('resultado-lista');
+	const filtroMonitoreoForm = document.getElementById('filtro-monitoreo-form');
+	const checkboxContaminantes = document.getElementById('checkbox-contaminantes');
+	const chartsRow = document.getElementById('charts-row');
+	const btnDescargarCSV = document.getElementById('btn-descargar-csv');
 
-  new Morris.Line({
-    element: 'myfirstchart3',
-    data: [
-      { year: '2008', value: 50 },
-      { year: '2009', value: 60 },
-      { year: '2010', value: 55 },
-      { year: '2011', value: 65 },
-      { year: '2012', value: 70 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#3357FF']  <!-- Color Azul -->
-  });
+	const inputInicio = document.getElementById('fecha-inicio');
+	const inputFin = document.getElementById('fecha-fin');
 
-  new Morris.Line({
-    element: 'myfirstchart4',
-    data: [
-      { year: '2008', value: 40 },
-      { year: '2009', value: 30 },
-      { year: '2010', value: 35 },
-      { year: '2011', value: 45 },
-      { year: '2012', value: 50 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#FF33A1']  <!-- Color Rosa -->
-  });
+	let zonasDisponibles = [];
 
-  new Morris.Line({
-    element: 'myfirstchart5',
-    data: [
-      { year: '2008', value: 60 },
-      { year: '2009', value: 55 },
-      { year: '2010', value: 65 },
-      { year: '2011', value: 75 },
-      { year: '2012', value: 80 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#F5D300']  <!-- Color Amarillo -->
-  });
+	const colores = ['#0b62a4', '#7A92A3', '#4DA74D', '#AFD8F8', '#EDC240', '#cb4b4b', '#9440ed'];
 
-  new Morris.Line({
-    element: 'myfirstchart6',
-    data: [
-      { year: '2008', value: 70 },
-      { year: '2009', value: 80 },
-      { year: '2010', value: 75 },
-      { year: '2011', value: 85 },
-      { year: '2012', value: 90 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#00B5E2']  <!-- Color Azul Claro -->
-  });
+	function llenarSelect(select, items) {
+	  select.innerHTML = '<option value="">Seleccionar...</option>';
+	  [...new Set(items)].filter(Boolean).sort().forEach(item => {
+		const option = document.createElement('option');
+		option.value = item;
+		option.textContent = item;
+		select.appendChild(option);
+	  });
+	}
 
-  new Morris.Line({
-    element: 'myfirstchart7',
-    data: [
-      { year: '2008', value: 80 },
-      { year: '2009', value: 85 },
-      { year: '2010', value: 90 },
-      { year: '2011', value: 95 },
-      { year: '2012', value: 100 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#FF914D']  <!-- Color Naranja -->
-  });
+	async function obtenerZonas() {
+	  try {
+		const res = await fetch(`${apiBase}/api/zonas`);
+		if (!res.ok) throw new Error('Error al obtener zonas');
+		zonasDisponibles = await res.json();
+		llenarSelect(selectPais, zonasDisponibles.map(z => z.pais));
+	  } catch (error) {
+		console.error('Error al cargar zonas:', error);
+	  }
+	}
 
-  new Morris.Line({
-    element: 'myfirstchart8',
-    data: [
-      { year: '2008', value: 15 },
-      { year: '2009', value: 25 },
-      { year: '2010', value: 35 },
-      { year: '2011', value: 45 },
-      { year: '2012', value: 55 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#7D2C8F']  <!-- Color Púrpura -->
-  });
+	async function obtenerDatosUbicacion(filtro = {}) {
+	  try {
+		const res = await fetch(`${apiBase}/api/nodos`);
+		if (!res.ok) throw new Error('Error al obtener nodos');
+		const nodos = await res.json();
 
-  new Morris.Line({
-    element: 'myfirstchart9',
-    data: [
-      { year: '2008', value: 10 },
-      { year: '2009', value: 15 },
-      { year: '2010', value: 5 },
-      { year: '2011', value: 25 },
-      { year: '2012', value: 20 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#1F618D']  <!-- Color Azul Oscuro -->
-  });
+		const mapaZonas = new Map(zonasDisponibles.map(z => [z.id_zona || z._id, z]));
 
-  new Morris.Line({
-    element: 'myfirstchart10',
-    data: [
-      { year: '2008', value: 25 },
-      { year: '2009', value: 35 },
-      { year: '2010', value: 30 },
-      { year: '2011', value: 40 },
-      { year: '2012', value: 50 }
-    ],
-    xkey: 'year',
-    ykeys: ['value'],
-    labels: ['Value'],
-    lineColors: ['#D35400']  <!-- Color Naranja Oscuro -->
-  });
+		const nodosFiltrados = nodos.filter(nodo => {
+		  const zona = mapaZonas.get(nodo.id_zona) || {};
+		  return (!filtro.pais || zona.pais === filtro.pais) &&
+				 (!filtro.estado || zona.estado === filtro.estado) &&
+				 (!filtro.municipio || zona.municipio === filtro.municipio) &&
+				 (!filtro.localidad || zona.localidad === filtro.localidad);
+		});
+
+		resultadoLista.innerHTML = '';
+		checkboxContaminantes.innerHTML = '';
+
+		if (nodosFiltrados.length === 0) {
+		  resultadoLista.innerHTML = '<li class="list-group-item">No se encontraron nodos con esos filtros.</li>';
+		  return;
+		}
+
+		nodosFiltrados.forEach(nodo => {
+		  const li = document.createElement('li');
+		  li.className = 'list-group-item list-group-item-action';
+		  li.style.cursor = 'pointer';
+		  li.textContent = `${nodo.nombre} (${nodo.coordenadas || 'Sin coordenadas'})`;
+
+		  li.addEventListener('click', async () => {
+			localStorage.setItem('nodoSeleccionado', nodo.id_nodo);
+			try {
+			  const resMonitoreos = await fetch(`${apiBase}/api/monitoreos?id_nodo=${nodo.id_nodo}`);
+			  if (!resMonitoreos.ok) throw new Error('Error al obtener monitoreos');
+			  const monitoreos = await resMonitoreos.json();
+			  if (monitoreos.length === 0) {
+				checkboxContaminantes.innerHTML = '<p class="text-muted">No hay monitoreos disponibles para este nodo.</p>';
+				return;
+			  }
+
+			  const fechas = monitoreos.map(m => m.fecha).sort();
+			  if (!inputInicio.value) inputInicio.value = fechas[0];
+			  if (!inputFin.value) inputFin.value = fechas[fechas.length - 1];
+			  inputInicio.max = fechas[fechas.length - 1];
+			  inputFin.min = fechas[0];
+
+			  const monitoreoReciente = monitoreos[monitoreos.length - 1];
+			  renderizarCheckboxContaminantes(monitoreoReciente);
+			} catch (error) {
+			  console.error('Error al obtener monitoreos:', error);
+			}
+		  });
+
+		  resultadoLista.appendChild(li);
+		});
+
+	  } catch (error) {
+		console.error('Error:', error);
+	  }
+	}
+
+	inputInicio.addEventListener('input', () => {
+	  inputFin.min = inputInicio.value || '';
+	});
+
+	inputFin.addEventListener('input', () => {
+	  inputInicio.max = inputFin.value || '';
+	});
+
+	function renderizarCheckboxContaminantes(monitoreo) {
+	  checkboxContaminantes.innerHTML = '';
+	  if (!monitoreo || !Array.isArray(monitoreo.Datos)) return;
+
+	  const tipos = [...new Set(monitoreo.Datos.map(d => d.tipo))];
+	  tipos.forEach((tipo, i) => {
+		const div = document.createElement('div');
+		div.className = 'form-check col-md-2 mb-2';
+		div.innerHTML = `
+		  <input class="form-check-input" type="checkbox" value="${tipo}" id="contaminante-${i}" checked>
+		  <label class="form-check-label" for="contaminante-${i}">${tipo}</label>
+		`;
+		checkboxContaminantes.appendChild(div);
+	  });
+	}
+
+	selectPais.addEventListener('change', () => {
+	  const estados = zonasDisponibles.filter(z => z.pais === selectPais.value).map(z => z.estado);
+	  llenarSelect(selectEstado, estados);
+	  selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
+	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+	});
+
+	selectEstado.addEventListener('change', () => {
+	  const municipios = zonasDisponibles.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value).map(z => z.municipio);
+	  llenarSelect(selectMunicipio, municipios);
+	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+	});
+
+	selectMunicipio.addEventListener('change', () => {
+	  const localidades = zonasDisponibles.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value && z.municipio === selectMunicipio.value).map(z => z.localidad);
+	  llenarSelect(selectLocalidad, localidades);
+	});
+
+	formBusqueda.addEventListener('submit', e => {
+	  e.preventDefault();
+	  obtenerDatosUbicacion({
+		pais: selectPais.value,
+		estado: selectEstado.value,
+		municipio: selectMunicipio.value,
+		localidad: selectLocalidad.value
+	  });
+	});
+
+	filtroMonitoreoForm.addEventListener('submit', async e => {
+	  e.preventDefault();
+	  const nodoSeleccionado = localStorage.getItem('nodoSeleccionado');
+	  if (!nodoSeleccionado) return alert('Selecciona un nodo primero.');
+
+	  const fechaInicio = inputInicio.value;
+	  const fechaFin = inputFin.value;
+
+	  let url = `${apiBase}/api/monitoreos?id_nodo=${nodoSeleccionado}`;
+	  if (fechaInicio) url += `&fecha_ini=${fechaInicio}`;
+	  if (fechaFin) url += `&fecha_fin=${fechaFin}`;
+
+	  try {
+		const res = await fetch(url);
+		if (!res.ok) throw new Error('Error al obtener datos');
+		const monitoreos = await res.json();
+
+		window.monitoreosFiltrados = monitoreos;
+
+		if (!monitoreos.length) {
+		  chartsRow.innerHTML = '<p class="text-muted">No hay datos en ese rango.</p>';
+		  return;
+		}
+
+		const tiposSeleccionados = Array.from(checkboxContaminantes.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+		if (!tiposSeleccionados.length) return alert('Selecciona al menos un tipo de dato.');
+
+		const datosParaGrafica = monitoreos.map(m => {
+		  const base = { fecha_hora: `${m.fecha} ${m.hora}` };
+		  tiposSeleccionados.forEach(tipo => {
+			const encontrado = m.Datos.find(d => d.tipo === tipo);
+			base[tipo] = encontrado ? parseFloat(encontrado.valor) || 0 : 0;
+		  });
+		  return base;
+		});
+
+		chartsRow.innerHTML = '';
+		tiposSeleccionados.forEach((tipo, i) => {
+		  const col = document.createElement('div');
+		  col.className = 'col-md-12 mb-4';
+
+		  const card = document.createElement('div');
+		  card.className = 'card shadow';
+
+		  const cardBody = document.createElement('div');
+		  cardBody.className = 'card-body';
+
+		  const title = document.createElement('h6');
+		  title.className = 'card-title';
+		  title.textContent = `Gráfica de ${tipo.toUpperCase()}`;
+
+		  const chartDiv = document.createElement('div');
+		  chartDiv.id = `grafica-${tipo}`;
+		  chartDiv.style.height = '300px';
+
+		  cardBody.appendChild(title);
+		  cardBody.appendChild(chartDiv);
+		  card.appendChild(cardBody);
+		  col.appendChild(card);
+		  chartsRow.appendChild(col);
+
+		  const datosTipo = datosParaGrafica.map(d => ({
+			fecha_hora: d.fecha_hora,
+			valor: d[tipo]
+		  }));
+
+		  new Morris.Line({
+			element: chartDiv.id,
+			data: datosTipo,
+			xkey: 'fecha_hora',
+			ykeys: ['valor'],
+			labels: [tipo.toUpperCase()],
+			parseTime: false,
+			lineColors: [colores[i % colores.length]],
+			resize: true
+		  });
+		});
+	  } catch (err) {
+		console.error('Error al graficar:', err);
+		chartsRow.innerHTML = '<p class="text-danger">Error al generar gráficas.</p>';
+	  }
+	});
+
+	document.getElementById('btn-descargar-csv').addEventListener('click', () => {
+	  if (window.monitoreosFiltrados) {
+		descargarCSVDeMonitoreos(window.monitoreosFiltrados);
+	  } else {
+		alert('Primero realiza una búsqueda con el filtro.');
+	  }
+	});
+
+	function descargarCSVDeMonitoreos(monitoreos) {
+	  if (!monitoreos.length) return alert('No hay datos para descargar.');
+
+	  const encabezados = ['id_monitoreo', 'id_nodo', 'fecha', 'hora', 'tipo', 'valor'];
+	  const filas = [];
+
+	  monitoreos.forEach(m => {
+		m.Datos.forEach(d => {
+		  filas.push([
+			m.id_monitoreo,
+			m.id_nodo,
+			m.fecha,
+			m.hora,
+			d.tipo,
+			d.valor
+		  ]);
+		});
+	  });
+
+	  let csvContent = encabezados.join(',') + '\n';
+	  csvContent += filas.map(fila => fila.map(val => `"${val}"`).join(',')).join('\n');
+
+	  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	  const url = URL.createObjectURL(blob);
+	  const link = document.createElement('a');
+	  link.setAttribute('href', url);
+	  link.setAttribute('download', 'monitoreo.csv');
+	  link.style.display = 'none';
+	  document.body.appendChild(link);
+	  link.click();
+	  document.body.removeChild(link);
+	}
+
+	obtenerZonas();
 </script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
 						
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
