@@ -308,6 +308,25 @@
 
     </div>
   </div>
+	  
+	  <div id="cargando-main" style="
+	  position: absolute;
+	  top: 0; left: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(255, 255, 255, 0.7);
+	  z-index: 50;
+	  display: none;
+	  justify-content: center;
+	  align-items: center;
+	">
+	  <div class="text-center">
+		<div class="spinner-border text-primary" role="status"></div>
+		<div class="mt-2 fw-bold text-primary">Cargando datos...</div>
+	  </div>
+	</div>
+	  
+
 </main>
 	  							
 </main>
@@ -373,7 +392,18 @@
   const apiBase = "https://smma-aobk.onrender.com/api/sensors";
   let sensoresData = [];
 
-  // Función genérica para llamadas a la API
+  // Mostrar / ocultar carga bloqueando scroll main
+  function mostrarCargaMain() {
+    const main = document.querySelector('main');
+    if (main) main.style.overflow = 'hidden';
+    document.getElementById('cargando-main').style.display = 'flex';
+  }
+  function ocultarCargaMain() {
+    const main = document.querySelector('main');
+    if (main) main.style.overflow = 'auto';
+    document.getElementById('cargando-main').style.display = 'none';
+  }
+
   async function apiRequest(url, options = {}) {
     const response = await fetch(proxy + url, options);
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
@@ -381,13 +411,16 @@
   }
 
   async function obtenerSensores() {
+    mostrarCargaMain();
     try {
       sensoresData = await apiRequest(apiBase);
       llenarFiltros(sensoresData);
       mostrarSensores(sensoresData);
     } catch (error) {
       console.error("Error al obtener sensores:", error);
-      alert("No se pudieron cargar los datos de sensores.");
+      mostrarAlerta("No se pudieron cargar los datos de sensores.", "danger");
+    } finally {
+      ocultarCargaMain();
     }
   }
 
@@ -409,33 +442,33 @@
   }
 
   function mostrarSensores(sensores) {
-  const tbody = document.getElementById('sensoresBody');
-  tbody.innerHTML = '';
+    const tbody = document.getElementById('sensoresBody');
+    tbody.innerHTML = '';
 
-  if (sensores.length === 0) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td colspan="5" class="text-center text-muted fs-5">
-        No se encontraron sensores para los filtros seleccionados.
-      </td>
-    `;
-    tbody.appendChild(tr);
-    return;
+    if (sensores.length === 0) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td colspan="5" class="text-center text-muted fs-5">
+          No se encontraron sensores para los filtros seleccionados.
+        </td>
+      `;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    tbody.innerHTML = sensores.map(sensor => `
+      <tr>
+        <td>${sensor.nombre || 'N/A'}</td>
+        <td>${sensor.tipo_dato || 'N/A'}</td>
+        <td>${sensor.analogico_digital || 'N/A'}</td>
+        <td>${sensor.id_sensor || 'N/A'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacionSensor('${sensor.id_sensor}')">Eliminar</button>
+          <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
+        </td>
+      </tr>
+    `).join('');
   }
-
-  tbody.innerHTML = sensores.map(sensor => `
-    <tr>
-      <td>${sensor.nombre || 'N/A'}</td>
-      <td>${sensor.tipo_dato || 'N/A'}</td>
-      <td>${sensor.analogico_digital || 'N/A'}</td>
-      <td>${sensor.id_sensor || 'N/A'}</td>
-      <td>
-        <button class="btn btn-danger btn-sm col-12 mb-1" onclick="confirmarEliminacionSensor('${sensor.id_sensor}')">Eliminar</button>
-        <button class="btn btn-info btn-sm col-12" onclick="modificarSensor('${sensor.id_sensor}', '${sensor.analogico_digital}', '${sensor.nombre}', '${sensor.tipo_dato}')">Modificar</button>
-      </td>
-    </tr>
-  `).join('');
-}
 
   function filtrarSensores() {
     const tipoDato = document.getElementById('tipoDato').value;
@@ -449,30 +482,32 @@
     mostrarSensores(filtrados);
   }
 
-    let idSensorAEliminar = null;
+  let idSensorAEliminar = null;
 
-	function confirmarEliminacionSensor(id) {
-	  idSensorAEliminar = id;
-	  const modal = new bootstrap.Modal(document.getElementById('modalEliminarSensor'));
-	  modal.show();
-	}
+  function confirmarEliminacionSensor(id) {
+    idSensorAEliminar = id;
+    const modal = new bootstrap.Modal(document.getElementById('modalEliminarSensor'));
+    modal.show();
+  }
 
-	document.getElementById('btnConfirmarEliminarSensor').addEventListener('click', async () => {
-	  if (!idSensorAEliminar) return;
+  document.getElementById('btnConfirmarEliminarSensor').addEventListener('click', async () => {
+    if (!idSensorAEliminar) return;
 
-	  try {
-		await apiRequest(`${apiBase}/${idSensorAEliminar}`, { method: 'DELETE' });
-		mostrarAlerta('Sensor eliminado exitosamente.', 'success');
-		obtenerSensores();
-	  } catch (error) {
-		console.error(error);
-		mostrarAlerta('Error al eliminar el sensor.', 'danger');
-	  } finally {
-		const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarSensor'));
-		modal.hide();
-		idSensorAEliminar = null;
-	  }
-	});
+    mostrarCargaMain();
+    try {
+      await apiRequest(`${apiBase}/${idSensorAEliminar}`, { method: 'DELETE' });
+      mostrarAlerta('Sensor eliminado exitosamente.', 'success');
+      await obtenerSensores();
+    } catch (error) {
+      console.error(error);
+      mostrarAlerta('Error al eliminar el sensor.', 'danger');
+    } finally {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminarSensor'));
+      modal.hide();
+      idSensorAEliminar = null;
+      ocultarCargaMain();
+    }
+  });
 
   function modificarSensor(id, tipo, nombre, dato) {
     document.getElementById("sensorIdM").value = id;
@@ -494,6 +529,7 @@
       return;
     }
 
+    mostrarCargaMain();
     try {
       await apiRequest(`${apiBase}/${id}`, {
         method: 'PUT',
@@ -502,10 +538,12 @@
       });
       bootstrap.Modal.getInstance(document.getElementById('modalModificar')).hide();
       mostrarAlerta('Sensor actualizado correctamente.', 'success');
-      obtenerSensores();
+      await obtenerSensores();
     } catch (error) {
       console.error('Error al guardar cambios:', error);
       mostrarAlerta('Error al guardar los cambios.', 'danger');
+    } finally {
+      ocultarCargaMain();
     }
   }
 
@@ -525,6 +563,7 @@
 
   obtenerSensores();
 </script>
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>

@@ -305,6 +305,22 @@
 
     </div>
   </div>
+   <div id="cargando-main" style="
+	  position: absolute;
+	  top: 0; left: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(255, 255, 255, 0.7);
+	  z-index: 50;
+	  display: none;
+	  justify-content: center;
+	  align-items: center;
+	">
+	  <div class="text-center">
+		<div class="spinner-border text-primary" role="status"></div>
+		<div class="mt-2 fw-bold text-primary">Cargando datos...</div>
+	  </div>
+	</div>
 </main>	  							
 </main>
 
@@ -356,8 +372,17 @@
   let matriculaAEliminar = null;
   let matriculaParaAdmin = null;
 
+  // Mostrar/ocultar overlay de carga
+  function mostrarLoading(mostrar) {
+    const cargando = document.getElementById('cargando-main');
+    if (cargando) {
+      cargando.style.display = mostrar ? 'flex' : 'none';
+    }
+  }
+
   // Obtener usuarios desde la API
   async function obtenerUsuarios() {
+    mostrarLoading(true);
     try {
       const res = await fetch(proxy + apiUsuarios);
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
@@ -366,6 +391,8 @@
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
       mostrarAlerta("No se pudieron cargar los datos de usuarios.", "danger");
+    } finally {
+      mostrarLoading(false);
     }
   }
 
@@ -405,7 +432,7 @@
     mostrarUsuarios(filtrados);
   }
 
-  // Confirmar eliminación por modal
+  // Confirmar eliminación con modal
   function confirmarEliminacion(matricula) {
     matriculaAEliminar = matricula;
     new bootstrap.Modal(document.getElementById('modalConfirmarEliminar')).show();
@@ -413,6 +440,7 @@
 
   document.getElementById('btnEliminarConfirmado').addEventListener('click', async () => {
     if (!matriculaAEliminar) return;
+    mostrarLoading(true);
     try {
       const res = await fetch(proxy + `${apiUsuarios}/${matriculaAEliminar}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
@@ -424,10 +452,11 @@
     } finally {
       bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
       matriculaAEliminar = null;
+      mostrarLoading(false);
     }
   });
 
-  // Confirmar asignación de admin por modal
+  // Confirmar asignación de administrador con modal
   function confirmarAdmin(matricula) {
     matriculaParaAdmin = matricula;
     new bootstrap.Modal(document.getElementById('modalConfirmarAdmin')).show();
@@ -435,7 +464,7 @@
 
   document.getElementById('btnAdminConfirmado').addEventListener('click', async () => {
     if (!matriculaParaAdmin) return;
-
+    mostrarLoading(true);
     try {
       const usuario = usuariosData.find(u => u.matricula === matriculaParaAdmin);
       if (!usuario) throw new Error("Usuario no encontrado");
@@ -460,6 +489,7 @@
     } finally {
       bootstrap.Modal.getInstance(document.getElementById('modalConfirmarAdmin')).hide();
       matriculaParaAdmin = null;
+      mostrarLoading(false);
     }
   });
 
@@ -478,14 +508,16 @@
     }, 4000);
   }
 
-  // Filtrado en vivo
+  // Filtrado en vivo por input nombre
   document.getElementById('nombre').addEventListener('input', e => {
     filtrarUsuariosPorNombre(e.target.value);
   });
 
-  // Inicializar
+  // Inicializar al cargar la página
   obtenerUsuarios();
 </script>
+
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script></body>
