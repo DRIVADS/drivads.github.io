@@ -122,6 +122,16 @@
 		max-height: 30vh;
 		overflow-y: auto;
 	  }
+		
+	  .main-scrollable {
+		  width: 100vw;
+		  position: relative;
+		  overflow-y: auto;
+		}
+	 
+	  .no-scroll {
+		  overflow: hidden;
+		}
     </style>
 
     
@@ -251,7 +261,7 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap" style="width: 100vw; overflow-y: auto; position: relative;">
+  <main id="main-content" class="d-flex flex-nowrap main-scrollable">
   
   <!--<div class="col-sm-6 col-lg-12 m-2 row" style="max-height: 600px; overflow-y: auto;">-->
   <div class="full-width-container">
@@ -417,12 +427,14 @@
   let zonasDisponibles = [];
 
   function mostrarCargaMain() {
-    document.getElementById('cargando-main').style.display = 'flex';
-  }
+	  document.getElementById('cargando-main').style.display = 'flex';
+	  document.getElementById('main-content').classList.add('no-scroll'); // desactiva scroll en main
+	}
 
-  function ocultarCargaMain() {
-    document.getElementById('cargando-main').style.display = 'none';
-  }
+	function ocultarCargaMain() {
+	  document.getElementById('cargando-main').style.display = 'none';
+	  document.getElementById('main-content').classList.remove('no-scroll'); // reactiva scroll en main
+	}
 
   function deshabilitarSelects() {
     selectPais.disabled = true;
