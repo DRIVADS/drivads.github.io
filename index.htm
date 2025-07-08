@@ -251,7 +251,7 @@
 
   <div class="b-example-divider b-example-vr"></div>
 	
-  <main class="d-flex flex-nowrap" style="width: 100vw; overflow-y: auto;" >
+  <main class="d-flex flex-nowrap" style="width: 100vw; overflow-y: auto; position: relative;">
   
   <!--<div class="col-sm-6 col-lg-12 m-2 row" style="max-height: 600px; overflow-y: auto;">-->
   <div class="full-width-container">
@@ -361,6 +361,23 @@
       </div>
     </div>
   </div>
+	 <!-- Indicador de carga local -->
+	<div id="cargando-main" style="
+	  position: absolute;
+	  top: 0; left: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(255, 255, 255, 0.7);
+	  z-index: 50;
+	  display: none;
+	  justify-content: center;
+	  align-items: center;
+	">
+	  <div class="text-center">
+		<div class="spinner-border text-primary" role="status"></div>
+		<div class="mt-2 fw-bold text-primary">Cargando datos...</div>
+	  </div>
+	</div>
 </main>
 
 <!-- Modal para mapa -->
@@ -379,24 +396,7 @@
   </div>
 </div>
 
-<!-- Pantalla de carga -->
-<div id="pantalla-carga" style="
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
-  z-index: 1050;
-  display: none;
-  justify-content: center;
-  align-items: center;
-">
-  <div class="text-center">
-    <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
-      <span class="visually-hidden">Cargando...</span>
-    </div>
-    <p class="mt-3 fw-bold text-primary">Cargando datos...</p>
-  </div>
-</div>
+
 
 
 <script>
@@ -416,6 +416,14 @@
 
   let zonasDisponibles = [];
 
+  function mostrarCargaMain() {
+    document.getElementById('cargando-main').style.display = 'flex';
+  }
+
+  function ocultarCargaMain() {
+    document.getElementById('cargando-main').style.display = 'none';
+  }
+
   function llenarSelect(select, items) {
     select.innerHTML = '<option value="">Seleccionar...</option>';
     [...new Set(items)].forEach(item => {
@@ -425,26 +433,26 @@
       select.appendChild(option);
     });
   }
-	
+
   function abrirMapa(coordenadas) {
-	  if (!coordenadas || !coordenadas.includes(',')) {
-		alert('Coordenadas inválidas');
-		return;
-	  }
+    if (!coordenadas || !coordenadas.includes(',')) {
+      alert('Coordenadas inválidas');
+      return;
+    }
 
-	  const [lat, lng] = coordenadas.split(',').map(c => c.trim());
+    const [lat, lng] = coordenadas.split(',').map(c => c.trim());
 
-	  if (isNaN(lat) || isNaN(lng)) {
-		alert('Coordenadas inválidas');
-		return;
-	  }
+    if (isNaN(lat) || isNaN(lng)) {
+      alert('Coordenadas inválidas');
+      return;
+    }
 
-	  const src = `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
-	  document.getElementById('iframeMapa').src = src;
+    const src = `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+    document.getElementById('iframeMapa').src = src;
 
-	  const modal = new bootstrap.Modal(document.getElementById('modalMapa'));
-	  modal.show();
-	}
+    const modal = new bootstrap.Modal(document.getElementById('modalMapa'));
+    modal.show();
+  }
 
   function mostrarAlerta(mensaje, tipo = 'info') {
     const alertId = `alert-${Date.now()}`;
@@ -466,7 +474,7 @@
       if (!res.ok) throw new Error('Error al obtener zonas');
       zonasDisponibles = await res.json();
       const paises = zonasDisponibles.map(z => z.pais);
-	  llenarSelect(selectPais, paises);
+      llenarSelect(selectPais, paises);
     } catch (error) {
       mostrarAlerta('Error al cargar zonas.', 'danger');
       console.error(error);
@@ -474,6 +482,7 @@
   }
 
   async function obtenerDatos(filtro = {}) {
+    mostrarCargaMain();
     try {
       const res = await fetch(`${apiBase}/api/nodos`);
       if (!res.ok) throw new Error('Error al obtener nodos');
@@ -484,9 +493,9 @@
       const nodosFiltrados = nodos.filter(nodo => {
         const zona = mapaZonas.get(nodo.id_zona) || {};
         return (!filtro.pais || zona.pais === filtro.pais) &&
-			   (!filtro.estado || zona.estado === filtro.estado) &&
-			   (!filtro.municipio || zona.municipio === filtro.municipio) &&
-			   (!filtro.localidad || zona.localidad === filtro.localidad);
+               (!filtro.estado || zona.estado === filtro.estado) &&
+               (!filtro.municipio || zona.municipio === filtro.municipio) &&
+               (!filtro.localidad || zona.localidad === filtro.localidad);
       });
 
       resultadoLista.innerHTML = '';
@@ -504,18 +513,15 @@
         li.className = 'list-group-item list-group-item-action';
         li.style.cursor = 'pointer';
         li.innerHTML = `
-		  <div class="d-flex justify-content-between align-items-center">
-			<span>${nodo.nombre}</span>
-			${nodo.cordenadas ? `
-			  <button class="btn btn-outline-primary btn-sm ms-2" onclick="abrirMapa('${nodo.cordenadas}')">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe-americas" viewBox="0 0 16 16">
-				  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0M2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484q-.121.12-.242.234c-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
-				</svg>
-			  </button>
-			` : '<span class="text-muted small ms-2">(Sin coordenadas)</span>'}
-		  </div>
-		`;
-		  
+          <div class="d-flex justify-content-between align-items-center">
+            <span>${nodo.nombre}</span>
+            ${nodo.cordenadas ? `
+              <button class="btn btn-outline-primary btn-sm ms-2" onclick="abrirMapa('${nodo.cordenadas}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe-americas" viewBox="0 0 16 16">
+                  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0..."/>
+                </svg>
+              </button>` : '<span class="text-muted small ms-2">(Sin coordenadas)</span>'}
+          </div>`;
         li.addEventListener('click', () => {
           tituloMonitoreo.textContent = `Monitoreo - ${nodo.nombre}`;
           mostrarMonitoreoNodo(nodo.id_nodo);
@@ -523,39 +529,30 @@
         });
         resultadoLista.appendChild(li);
       });
-
     } catch (error) {
       mostrarAlerta('Error al obtener nodos.', 'danger');
       console.error(error);
+    } finally {
+      ocultarCargaMain();
     }
   }
-	// funcion para los gifs
-	//imgs/Captura.png
-	  function obtenerGifPorTipo(tipo) {
-	  const tipoNormalizado = tipo.toLowerCase();
 
-	  switch (tipoNormalizado) {
-		case 'temperatura':
-		  return 'imgs/particulas.gif';
-	    case 'uv':
-		  return 'imgs/radiacion-uv.gif';
-		case 'humedad':
-		  return 'imgs/lluvia.gif';
-	    case 'angulo':
-		  return 'imgs/veleta.gif';
-	    case 'velocidad':
-		  return 'imgs/viento.gif';
-		case 'co2':
-		  return 'imgs/co2.gif';
-	    case 'Litros':
-		  return 'https://media.giphy.com/media/3o7TKsQmoCf6Q/giphy.gif';
-		default:
-		  return 'imgs/particulas.gif'; // GIF por defecto
-	  }
-	}
-
+  function obtenerGifPorTipo(tipo) {
+    const tipoNormalizado = tipo.toLowerCase();
+    switch (tipoNormalizado) {
+      case 'temperatura': return 'imgs/particulas.gif';
+      case 'uv': return 'imgs/radiacion-uv.gif';
+      case 'humedad': return 'imgs/lluvia.gif';
+      case 'angulo': return 'imgs/veleta.gif';
+      case 'velocidad': return 'imgs/viento.gif';
+      case 'co2': return 'imgs/co2.gif';
+      case 'litros': return 'https://media.giphy.com/media/3o7TKsQmoCf6Q/giphy.gif';
+      default: return 'imgs/particulas.gif';
+    }
+  }
 
   async function mostrarMonitoreoNodo(id_nodo) {
+    mostrarCargaMain();
     try {
       const res = await fetch(`${apiBase}/api/monitoreos`);
       if (!res.ok) throw new Error('Error al obtener monitoreos');
@@ -574,30 +571,29 @@
         return fechaA > fechaB ? a : b;
       });
 
-        monitoreoContenedor.innerHTML = '';
-		monitoreoReciente.Datos.forEach(dato => {
-		  const gifURL = obtenerGifPorTipo(dato.tipo);
-
-		  const card = `
-			<div class="col-sm-6 col-lg-4 mb-3">
-			  <div class="card">
-				<div class="card-body">
-				  <div class="d-flex align-items-center gap-2 mb-2">
-					<img src="${gifURL}" alt="${dato.tipo}" style="height: 30px;">
-					<h5 class="card-title text-capitalize mb-0">${dato.tipo}</h5>
-				  </div>
-				  <p class="card-text">${dato.valor}</p>
-				  <p class="card-text"><small class="text-body-secondary">Última actualización ${monitoreoReciente.hora} - ${monitoreoReciente.fecha}</small></p>
-				</div>
-			  </div>
-			</div>`;
-		  monitoreoContenedor.insertAdjacentHTML('beforeend', card);
-		});
-
-
+      monitoreoContenedor.innerHTML = '';
+      monitoreoReciente.Datos.forEach(dato => {
+        const gifURL = obtenerGifPorTipo(dato.tipo);
+        const card = `
+          <div class="col-sm-6 col-lg-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <img src="${gifURL}" alt="${dato.tipo}" style="height: 30px;">
+                  <h5 class="card-title text-capitalize mb-0">${dato.tipo}</h5>
+                </div>
+                <p class="card-text">${dato.valor}</p>
+                <p class="card-text"><small class="text-body-secondary">Última actualización ${monitoreoReciente.hora} - ${monitoreoReciente.fecha}</small></p>
+              </div>
+            </div>
+          </div>`;
+        monitoreoContenedor.insertAdjacentHTML('beforeend', card);
+      });
     } catch (error) {
       mostrarAlerta('Error al obtener monitoreo.', 'danger');
       console.error(error);
+    } finally {
+      ocultarCargaMain();
     }
   }
 
@@ -621,43 +617,44 @@
   form.addEventListener('submit', e => {
     e.preventDefault();
     obtenerDatos({
-	  pais: selectPais.value || null,
-	  estado: selectEstado.value || null,
-	  municipio: selectMunicipio.value || null,
-	  localidad: selectLocalidad.value || null
-	});
+      pais: selectPais.value || null,
+      estado: selectEstado.value || null,
+      municipio: selectMunicipio.value || null,
+      localidad: selectLocalidad.value || null
+    });
   });
 
   selectEstado.addEventListener('change', () => {
-	  const municipios = zonasDisponibles
-		.filter(z => z.pais === selectPais.value && z.estado === selectEstado.value)
-		.map(z => z.municipio);
-	  llenarSelect(selectMunicipio, municipios);
-	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-	});
+    const municipios = zonasDisponibles
+      .filter(z => z.pais === selectPais.value && z.estado === selectEstado.value)
+      .map(z => z.municipio);
+    llenarSelect(selectMunicipio, municipios);
+    selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+  });
 
   selectMunicipio.addEventListener('change', () => {
-	  const localidades = zonasDisponibles
-		.filter(z =>
-		  z.pais === selectPais.value &&
-		  z.estado === selectEstado.value &&
-		  z.municipio === selectMunicipio.value
-		)
-		.map(z => z.localidad);
-	  llenarSelect(selectLocalidad, localidades);
-	});
- 
+    const localidades = zonasDisponibles
+      .filter(z =>
+        z.pais === selectPais.value &&
+        z.estado === selectEstado.value &&
+        z.municipio === selectMunicipio.value
+      )
+      .map(z => z.localidad);
+    llenarSelect(selectLocalidad, localidades);
+  });
+
   selectPais.addEventListener('change', () => {
-	  const estados = zonasDisponibles
-		.filter(z => z.pais === selectPais.value)
-		.map(z => z.estado);
-	  llenarSelect(selectEstado, estados);
-	  selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
-	  selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
-	});
+    const estados = zonasDisponibles
+      .filter(z => z.pais === selectPais.value)
+      .map(z => z.estado);
+    llenarSelect(selectEstado, estados);
+    selectMunicipio.innerHTML = '<option value="">Seleccionar...</option>';
+    selectLocalidad.innerHTML = '<option value="">Seleccionar...</option>';
+  });
 
   obtenerZonas().then(obtenerDatos);
 </script>
+
 							
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
