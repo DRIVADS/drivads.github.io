@@ -424,6 +424,20 @@
     document.getElementById('cargando-main').style.display = 'none';
   }
 
+  function deshabilitarSelects() {
+    selectPais.disabled = true;
+    selectEstado.disabled = true;
+    selectMunicipio.disabled = true;
+    selectLocalidad.disabled = true;
+  }
+
+  function habilitarSelects() {
+    selectPais.disabled = false;
+    selectEstado.disabled = false;
+    selectMunicipio.disabled = false;
+    selectLocalidad.disabled = false;
+  }
+
   function llenarSelect(select, items) {
     select.innerHTML = '<option value="">Seleccionar...</option>';
     [...new Set(items)].forEach(item => {
@@ -469,6 +483,8 @@
   }
 
   async function obtenerZonas() {
+    mostrarCargaMain();
+    deshabilitarSelects();
     try {
       const res = await fetch(`${apiBase}/api/zonas`);
       if (!res.ok) throw new Error('Error al obtener zonas');
@@ -478,6 +494,9 @@
     } catch (error) {
       mostrarAlerta('Error al cargar zonas.', 'danger');
       console.error(error);
+    } finally {
+      habilitarSelects();
+      ocultarCargaMain();
     }
   }
 
@@ -654,6 +673,7 @@
 
   obtenerZonas().then(obtenerDatos);
 </script>
+
 
 							
 </main>
