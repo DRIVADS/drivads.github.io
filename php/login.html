@@ -230,7 +230,7 @@
 
 <script>
 document.getElementById("login-form").addEventListener("submit", async function(e) {
-  e.preventDefault(); // Evita recarga
+  e.preventDefault(); // Evita recarga de página
 
   const email = document.getElementById("floatingInput").value.trim();
   const password = document.getElementById("floatingPassword").value;
@@ -238,6 +238,7 @@ document.getElementById("login-form").addEventListener("submit", async function(
   try {
     const proxyUrl = "https://cors-anywhere.herokuapp.com/";
     const apiUrl = "https://smma-aobk.onrender.com/api/USUARIOS";
+
     const response = await fetch(proxyUrl + apiUrl, {
       headers: {
         'Origin': 'http://localhost',
@@ -245,18 +246,25 @@ document.getElementById("login-form").addEventListener("submit", async function(
       }
     });
 
+    if (!response.ok) {
+      throw new Error("Error al conectar con la API");
+    }
+
     const users = await response.json();
 
+    // Buscar usuario con correo y contraseña exactos
     const user = users.find(u => u.correo === email && u.contrasena === password);
 
     if (user) {
-      alert(`Bienvenido, ${user.nombre} (${user.Rol})`);
-
+      // Guardar sesión con matrícula
       sessionStorage.setItem("usuario", JSON.stringify({
+        matricula: user.matricula,
         nombre: user.nombre,
         rol: user.Rol,
         correo: user.correo
       }));
+
+      alert(`Bienvenido, ${user.nombre} (${user.Rol})`);
 
       if (user.Rol === "Administrador") {
         window.location.href = "admin-dashboard.html";
@@ -266,12 +274,14 @@ document.getElementById("login-form").addEventListener("submit", async function(
     } else {
       alert("Correo o contraseña incorrectos.");
     }
+
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
-    alert("No se pudo conectar al servidor.");
+    alert("Ocurrió un error al iniciar sesión. Intenta más tarde.");
   }
 });
-</script>	  
+</script>
+	  
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
