@@ -194,26 +194,25 @@
 
       <div class="modal-body p-5 pt-0">
 		
-        <form class="">
+        <form id="registro-form">
 		  <div class="row">
 			  
 		  <div class="form-floating col-lg-6 mb-3">
-            <input type="Nombre" class="form-control rounded-3" id="nombre" placeholder="Nombre">
+            <input type="Nombre" class="form-control rounded-3" id="nombre" placeholder="Nombre" required>
             <label for="nombre" class="mx-2">Nombre</label>
           </div>
-			  
 		  <div class="form-floating col-lg-6 mb-3">
-            <input type="Nombre" class="form-control rounded-3" id="apellidoPa" placeholder="Nombre">
+            <input type="Nombre" class="form-control rounded-3" id="apellidoPa" placeholder="Nombre" required>
             <label for="apellidoPa" class="mx-2">Apellido Paterno</label>
           </div>
 			  
 		  <div class="form-floating col-lg-6 mb-3">
-            <input type="Nombre" class="form-control rounded-3" id="apellidoMa" placeholder="Nombre">
+            <input type="Nombre" class="form-control rounded-3" id="apellidoMa" placeholder="Nombre" required>
             <label for="apellidoMa" class="mx-2">Apellido Materno</label>
           </div>
 			  
 		   <div class="form-floating col-lg-6 mb-3">
-            <input type="date" class="form-control rounded-3" id="fecha" placeholder="Selecciona una fecha">
+            <input type="date" class="form-control rounded-3" id="fecha" placeholder="Selecciona una fecha" required>
   			<label for="fecha" class="mx-2">Fecha de Nacimiento</label>
           </div>
 			  
@@ -287,12 +286,12 @@
           </div>
 			
           <div class="form-floating mb-3">
-            <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com">
+            <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com" required>
             <label for="floatingInput">Correo Electronico</label>
           </div>
 			
           <div class="form-floating mb-3">
-            <input type="password" class="form-control rounded-3" id="floatingPassword" placeholder="Password">
+            <input type="password" class="form-control rounded-3" id="floatingPassword" placeholder="Password" required>
             <label for="floatingPassword">Contraseña</label>
           </div>
 			
@@ -300,21 +299,128 @@
 			
           <hr class="my-4">
           <h2 class="fs-5 fw-bold mb-3">O inicia con ...</h2>
-          <button class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" type="submit">
-            <svg class="bi me-1" width="16" height="16"><use xlink:href="#twitter"/></svg>
-            Iniciar con Twitter
-          </button>
-          <button class="w-100 py-2 mb-2 btn btn-outline-primary rounded-3" type="submit">
-            <svg class="bi me-1" width="16" height="16"><use xlink:href="#facebook"/></svg>
-            Iniciar con Facebook
-          </button>
+          <button class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" type="button">
+		  <svg class="bi me-1" width="16" height="16"><use xlink:href="#twitter"/></svg>
+		  Iniciar con Twitter
+		</button>
+		<button class="w-100 py-2 mb-2 btn btn-outline-primary rounded-3" type="button">
+		  <svg class="bi me-1" width="16" height="16"><use xlink:href="#facebook"/></svg>
+		  Iniciar con Facebook
+		</button>
+
         </form>
       </div>
     </div>
   </div>
 </div>
+<!-- Contenedor para alertas -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
+<!-- Modal de éxito -->
+<div class="modal fade" id="registroExitosoModal" tabindex="-1" aria-labelledby="registroExitosoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="registroExitosoLabel">Registro exitoso</h5>
+      </div>
+      <div class="modal-body">
+        ¡El usuario se ha registrado correctamente!
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnAceptarRegistro" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+	  
+<script>
+  document.getElementById("registro-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById("nombre").value.trim();
+    const apellidoPa = document.getElementById("apellidoPa").value.trim();
+    const apellidoMa = document.getElementById("apellidoMa").value.trim();
+    const fechaNacimiento = document.getElementById("fecha").value;
+    const institucion = document.getElementById("Institución").value;
+    const cargo = document.getElementById("Cargo").value;
+    const correo = document.getElementById("floatingInput").value.trim();
+    const contrasena = document.getElementById("floatingPassword").value;
+
+    if (!nombre || !apellidoPa || !correo || !contrasena) {
+      mostrarAlerta("Por favor llena todos los campos obligatorios.", "danger");
+      return;
+    }
+
+    const proxy = "https://cors-anywhere.herokuapp.com/";
+    const api = "https://smma-aobk.onrender.com/api/usuarios";
+
+    try {
+      // Verificar si ya existe un usuario con ese correo
+      const usuariosRes = await fetch(proxy + api);
+      const usuarios = await usuariosRes.json();
+      const existeCorreo = usuarios.some(u => u.correo.toLowerCase() === correo.toLowerCase());
+
+      if (existeCorreo) {
+        mostrarAlerta("El correo ya está registrado. Usa otro.", "warning");
+        return;
+      }
+
+      // Enviar nuevo usuario
+      const nuevoUsuario = {
+        nombre,
+        apellido_pa: apellidoPa,
+        apellido_ma: apellidoMa,
+        fechaNacimiento,
+        institucion,
+        cargo,
+        correo,
+        contrasena,
+        Rol: "Usuario"
+      };
+
+      const res = await fetch(proxy + api, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoUsuario)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        mostrarAlerta("Error al registrar: " + (err.message || "Intenta más tarde."), "danger");
+        return;
+      }
+
+      // Mostrar modal de éxito
+      const modal = new bootstrap.Modal(document.getElementById('registroExitosoModal'));
+      modal.show();
+
+      // Al cerrar el modal, redirigir al index
+      document.getElementById("btnAceptarRegistro").addEventListener("click", () => {
+        window.location.href = "../index.htm";
+      });
+
+    } catch (err) {
+      console.error(err);
+      mostrarAlerta("Error inesperado al registrar.", "danger");
+    }
+  });
+
+  function mostrarAlerta(mensaje, tipo = "info") {
+    const alerta = document.createElement("div");
+    alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alerta.role = "alert";
+    alerta.innerHTML = `
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    `;
+    document.getElementById("alertContainer").appendChild(alerta);
+
+    // Remover la alerta después de 5 segundos
+    setTimeout(() => {
+      alerta.remove();
+    }, 5000);
+  }
+</script>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
