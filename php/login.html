@@ -267,9 +267,9 @@ document.getElementById("login-form").addEventListener("submit", async function(
       alert(`Bienvenido, ${user.nombre} (${user.Rol})`);
 
       if (user.Rol === "Administrador") {
-        window.location.href = "admin-dashboard.html";
+        window.location.href = "Administrador/NodosIoT.htm";
       } else {
-        window.location.href = "../index.htm";
+        window.location.href = "monitoreo.htm";
       }
     } else {
       alert("Correo o contraseña incorrectos.");
@@ -281,7 +281,6 @@ document.getElementById("login-form").addEventListener("submit", async function(
   }
 });
 </script>
-	  
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
