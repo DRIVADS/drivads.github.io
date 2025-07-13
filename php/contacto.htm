@@ -217,7 +217,7 @@
       <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
         <li><a class="dropdown-item" href="perfil.htm">Perfil</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="login.html">Cerrar Cesión</a></li>
+        <li><a onclick="cerrarSesion()" class="dropdown-item" href="login.html">Cerrar Cesión</a></li>
       </ul>
     </div>
   </div>
@@ -295,5 +295,12 @@ document.addEventListener("DOMContentLoaded", function() {
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
+<script src="../js/auth.js"></script> <!-- Ajusta la ruta según la ubicación -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    validarSesion();           // Verifica si hay sesión
+    configurarMenuPorRol();    // (opcional) Oculta/mostrar menú según rol
+  });
+</script>
 </body>
 </html>
