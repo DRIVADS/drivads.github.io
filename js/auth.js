@@ -54,3 +54,16 @@ function soloAdministrador(rutaRedireccion = "login.html") {
     window.location.href = rutaRedireccion;
   }
 }
+
+// Si ya hay sesión iniciada, redirige según el rol
+function redirigirSiYaEstaLogueado() {
+  const usuario = obtenerUsuario();
+
+  if (usuario) {
+    if (usuario.rol === "Administrador") {
+      window.location.href = "Administrador/NodosIoT.htm";
+    } else {
+      window.location.href = "monitoreo.htm";
+    }
+  }
+}
