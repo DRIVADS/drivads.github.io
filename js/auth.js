@@ -17,7 +17,40 @@ function obtenerUsuario() {
 }
 
 // Cierra sesión completamente
-function cerrarSesion() {
+function cerrarSesion(ruta = "") {
   sessionStorage.removeItem("usuario");
-  window.location.href = "php/login.html";
+  window.location.href = ruta + "login.html";
+}
+
+// Muestra opciones del menú según el rol del usuario
+function configurarMenuPorRol() {
+  const usuario = obtenerUsuario();
+  if (!usuario) return;
+
+  const rol = usuario.rol;
+
+  // Mostrar nombre en el menú (si hay un contenedor para ello)
+  const nombreElemento = document.querySelector(".dropdown strong");
+  if (nombreElemento) {
+    nombreElemento.textContent = usuario.nombre;
+  }
+
+  // Mostrar u ocultar elementos por clase
+  if (rol === "Administrador") {
+    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+    document.querySelectorAll(".user-only").forEach(el => el.style.display = "none");
+  } else {
+    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+    document.querySelectorAll(".user-only").forEach(el => el.style.display = "block");
+  }
+}
+
+// Verifica si el usuario tiene rol de Administrador
+function soloAdministrador(rutaRedireccion = "login.html") {
+  const usuario = obtenerUsuario();
+
+  if (!usuario || usuario.rol !== "Administrador") {
+    alert("Acceso denegado. Esta página es solo para administradores.");
+    window.location.href = rutaRedireccion;
+  }
 }
