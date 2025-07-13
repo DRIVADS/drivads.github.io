@@ -181,7 +181,7 @@
 			<img src="../imgs/CapturaFondo.png" alt="logo" width="50" height="42">
 			SMMA</a>
       </div>
-      <div class="col-4 d-flex justify-content-end align-items-center">
+      <div id="contenedor-login" class="col-4 d-flex justify-content-end align-items-center">
         <a class="btn btn-outline-success" href="login.html">Ingresar</a>
 		<a class="btn btn-outline-warning mx-1" href="registrar.html">Registrar</a>
       </div>
@@ -308,5 +308,12 @@
   </p>
 </footer>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script> <!-- Asegúrate que la ruta sea correcta -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    mostrarMenuUsuarioSiLogueado();
+	configurarMenuPorRol();   // ajusta menú según rol
+  });
+</script>
 </body>
 </html>
