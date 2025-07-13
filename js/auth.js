@@ -67,3 +67,35 @@ function redirigirSiYaEstaLogueado() {
     }
   }
 }
+
+// Muestra el nombre del usuario en un elemento con id="nombre-usuario"
+function mostrarNombreUsuario() {
+  const usuario = obtenerUsuario();
+  const nombreElemento = document.getElementById("nombre-usuario");
+
+  if (usuario && usuario.nombre && nombreElemento) {
+    nombreElemento.textContent = usuario.nombre;
+  }
+}
+
+// Reemplaza los botones de login/registro por el menú de usuario si está logueado
+function mostrarMenuUsuarioSiLogueado() {
+  const usuario = obtenerUsuario();
+  const contenedor = document.getElementById("contenedor-login");
+
+  if (usuario && contenedor) {
+    contenedor.innerHTML = `
+      <div class="dropdown  border border-success rounded p-2">
+        <a href="#" class="d-flex align-items-center text-black text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="imgs/user.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+          <strong id="nombre-usuario">${usuario.nombre}</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+          <li><a class="dropdown-item" href="php/perfil.htm">Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a onclick="cerrarSesion()" class="dropdown-item" href="#">Cerrar sesión</a></li>
+        </ul>
+      </div>
+    `;
+  }
+}
