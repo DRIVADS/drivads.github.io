@@ -334,5 +334,11 @@
 </div>
 <script src="../js/userReg.js"></script>	  
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/auth.js"></script> <!-- o la ruta correcta -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    redirigirSiYaEstaLogueado(); // Si ya hay sesión, saca al usuario del registro
+  });
+</script>
 </body>
 </html>
