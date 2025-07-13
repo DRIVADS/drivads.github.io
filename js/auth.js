@@ -85,13 +85,17 @@ function mostrarMenuUsuarioSiLogueado() {
 
   if (usuario && contenedor) {
     contenedor.innerHTML = `
-      <div class="dropdown  border border-success rounded p-2">
+      <div class="dropdown border bd-indigo-300 rounded p-2">
         <a href="#" class="d-flex align-items-center text-black text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
           <img src="imgs/user.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
           <strong id="nombre-usuario">${usuario.nombre}</strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
           <li><a class="dropdown-item" href="php/perfil.htm">Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+		  <li><a class="dropdown-item" href="php/monitoreo.htm">Monitoreos</a></li>
+          <li><hr class="dropdown-divider"></li>
+		  <li><a class="dropdown-item" href="php/Metricas.htm">Historial</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a onclick="cerrarSesion()" class="dropdown-item" href="#">Cerrar sesión</a></li>
         </ul>
