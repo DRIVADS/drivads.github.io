@@ -68,15 +68,6 @@ function redirigirSiYaEstaLogueado() {
   }
 }
 
-// Muestra el nombre del usuario en un elemento con id="nombre-usuario"
-function mostrarNombreUsuario() {
-  const usuario = obtenerUsuario();
-  const nombreElemento = document.getElementById("nombre-usuario");
-
-  if (usuario && usuario.nombre && nombreElemento) {
-    nombreElemento.textContent = usuario.nombre;
-  }
-}
 
 // Reemplaza los botones de login/registro por el menú de usuario si está logueado
 function mostrarMenuUsuarioSiLogueado() {
@@ -103,3 +94,19 @@ function mostrarMenuUsuarioSiLogueado() {
     `;
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  if (!user) return;
+
+  const avatarImg = document.querySelector('img.rounded-circle');
+  if (avatarImg) {
+    if (user.rol === 'Administrador') {
+      avatarImg.src = "../imgs/perfil admin.png";
+      avatarImg.alt = "Administrador";
+    } else {
+      avatarImg.src = "../imgs/user.jpg";
+      avatarImg.alt = "Usuario";
+    }
+  }
+});
