@@ -277,7 +277,9 @@
     </div>
 
       <div class="d-grid">
-        <button type="button" class="btn btn-outline-secondary">Cambiar contraseña</button>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCambiarContrasena">
+		  Cambiar contraseña
+		</button>
       </div>
 	  <div class="d-grid mt-2">
         <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalConfirmarEliminar">
@@ -378,6 +380,39 @@
     </div>
   </div>
 </div>
+
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarContrasena" tabindex="-1" aria-labelledby="modalCambiarContrasenaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-primary">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalCambiarContrasenaLabel">Cambiar Contraseña</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formCambiarContrasena" novalidate>
+          <div class="mb-3">
+            <label for="contrasenaActual" class="form-label">Contraseña actual</label>
+            <input type="password" class="form-control" id="contrasenaActual" required>
+          </div>
+          <div class="mb-3">
+            <label for="nuevaContrasena" class="form-label">Nueva contraseña</label>
+            <input type="password" class="form-control" id="nuevaContrasena" required minlength="6">
+          </div>
+          <div class="mb-3">
+            <label for="confirmarContrasena" class="form-label">Confirmar nueva contraseña</label>
+            <input type="password" class="form-control" id="confirmarContrasena" required>
+          </div>
+          <div id="errorCambio" class="text-danger small d-none"></div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+	
 	
 </main>
 <script src="../js/auth.js"></script> <!-- o la ruta correcta -->
@@ -545,6 +580,84 @@
     } catch (error) {
       console.error("Error al eliminar cuenta:", error);
       errorDiv.textContent = "Error al eliminar cuenta. Intenta de nuevo.";
+      errorDiv.classList.remove('d-none');
+    }
+  });
+</script>
+<script>
+  document.getElementById("formCambiarContrasena").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const actual = document.getElementById("contrasenaActual").value.trim();
+    const nueva = document.getElementById("nuevaContrasena").value.trim();
+    const confirmar = document.getElementById("confirmarContrasena").value.trim();
+    const errorDiv = document.getElementById("errorCambio");
+    errorDiv.classList.add('d-none');
+
+    if (!actual || !nueva || !confirmar) {
+      errorDiv.textContent = "Todos los campos son obligatorios.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    if (nueva.length < 6) {
+      errorDiv.textContent = "La nueva contraseña debe tener al menos 6 caracteres.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    if (nueva !== confirmar) {
+      errorDiv.textContent = "Las nuevas contraseñas no coinciden.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    const user = JSON.parse(sessionStorage.getItem("usuario"));
+    if (!user) {
+      errorDiv.textContent = "Sesión no válida.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    try {
+      // Obtener todos los usuarios para validar contraseña actual
+      const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+      const apiUrl = "https://smma-aobk.onrender.com/api/USUARIOS";
+      const response = await fetch(proxyUrl + apiUrl, {
+        headers: {
+          'Origin': 'http://localhost',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      const usuarios = await response.json();
+      const usuarioReal = usuarios.find(u => u.matricula === user.matricula);
+
+      if (!usuarioReal || usuarioReal.contrasena !== actual) {
+        errorDiv.textContent = "La contraseña actual es incorrecta.";
+        errorDiv.classList.remove('d-none');
+        return;
+      }
+
+      // Actualizar contraseña
+      const updateUrl = `https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/usuarios/${user.matricula}`;
+      const updateResp = await fetch(updateUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ contrasena: nueva })
+      });
+
+      if (!updateResp.ok) throw new Error("No se pudo actualizar la contraseña");
+
+      alert("Contraseña actualizada con éxito");
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalCambiarContrasena'));
+      modal.hide();
+
+    } catch (error) {
+      console.error("Error al cambiar contraseña:", error);
+      errorDiv.textContent = "Ocurrió un error al cambiar la contraseña.";
       errorDiv.classList.remove('d-none');
     }
   });
