@@ -272,26 +272,9 @@
 
     <div class="text-center mb-3">
       <img src="../imgs/perfil admin.png" alt="Foto de perfil" width="74" height="74" class="rounded-circle me-2">
-      <h5 class="mb-0">Juan Pérez</h5>
-      <small class="text-muted">Administrador</small>
+      <h5 id="nombreUsuario" class="mb-0">x</h5>
+		<small id="rolUsuario" class="text-muted">x</small>
     </div>
-
-    <ul class="list-group mb-3">
-      <li class="list-group-item d-flex justify-content-between lh-sm">
-        <div>
-          <h6 class="my-0">Último acceso</h6>
-          <small class="text-body-secondary">hace 3 días</small>
-        </div>
-        <span class="text-body-secondary">🌐</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between lh-sm">
-        <div>
-          <h6 class="my-0">Sensores activos</h6>
-          <small class="text-body-secondary">Asociados a su cuenta</small>
-        </div>
-        <span class="text-body-secondary">12</span>
-      </li>
-    </ul>
 
     <form class="card p-2">
       <div class="d-grid">
@@ -375,95 +358,115 @@
 </div>
 							
 </main>
+<script src="../js/auth.js"></script> <!-- o la ruta correcta -->
 <script>
-    const userId = "v3MydB_KAL";
-    const apiUrl = `https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/usuarios/${userId}`;
+  // Obtener usuario y construir la URL
+  const user = obtenerUsuario();
+  console.log("Sesión activa:", user.nombre, "-", user.matricula);
+  const apiUrl = `https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com/api/usuarios/${user.matricula}`;
 
-    // Formatear fecha a YYYY-MM-DD
-    function formatearFecha(fecha) {
-      if (!fecha.includes('/')) return fecha;
-      const [yyyy, mm, dd] = fecha.split('/');
-      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-    }
+  // Mostrar nombre y rol en la cabecera
+  document.getElementById('nombreUsuario').textContent = user.nombre || '';
+  document.getElementById('rolUsuario').textContent = user.rol || '';
 
-    // Cargar datos del usuario al iniciar
-    async function cargarUsuario() {
-      try {
-        const respuesta = await fetch(apiUrl);
-        const usuario = await respuesta.json();
+  // Formatear fecha a YYYY-MM-DD
+  function formatearFecha(fecha) {
+    if (!fecha.includes('/')) return fecha;
+    const [yyyy, mm, dd] = fecha.split('/');
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+  }
 
-        document.getElementById('firstName').value = usuario.nombre || '';
-        document.getElementById('apellidoPa').value = usuario.apellido_pa || '';
-        document.getElementById('apellidoMa').value = usuario.apellido_ma || '';
-        document.getElementById('fecha').value = formatearFecha(usuario.fechaNacimiento || '');
-        document.getElementById('institucion').value = usuario.institucion || '';
-        document.getElementById('cargo').value = usuario.cargo || '';
-        document.getElementById('email').value = usuario.correo || '';
+  // Cargar datos del usuario al iniciar
+  async function cargarUsuario() {
+    try {
+      const respuesta = await fetch(apiUrl);
+      const usuario = await respuesta.json();
 
-      } catch (error) {
-        console.error("Error al cargar usuario:", error);
-        alert("No se pudieron cargar los datos del usuario.");
-      }
-    }
-
-    // Enviar formulario
-    document.getElementById('formActualizar').addEventListener('submit', async function (event) {
-      event.preventDefault();
-
-      if (!this.checkValidity()) {
-        this.classList.add('was-validated');
-        return;
-      }
-
-      const datosActualizados = {
-        nombre: document.getElementById('firstName').value,
-        apellido_pa: document.getElementById('apellidoPa').value,
-        apellido_ma: document.getElementById('apellidoMa').value,
-        fechaNacimiento: document.getElementById('fecha').value,
-        institucion: document.getElementById('institucion').value,
-        cargo: document.getElementById('cargo').value,
-        // correo NO se envía
+      const campos = {
+        firstName: usuario.nombre,
+        apellidoPa: usuario.apellido_pa,
+        apellidoMa: usuario.apellido_ma,
+        fecha: formatearFecha(usuario.fechaNacimiento || ''),
+        institucion: usuario.institucion,
+        cargo: usuario.cargo,
+        email: usuario.correo
       };
 
-      try {
-        const respuesta = await fetch(apiUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(datosActualizados)
-        });
-
-        if (!respuesta.ok) throw new Error("No se pudo actualizar");
-
-        alert("Datos actualizados correctamente");
-      } catch (error) {
-        console.error("Error al actualizar:", error);
-        alert("Hubo un error al guardar los datos.");
+      for (const id in campos) {
+        const input = document.getElementById(id);
+        if (input) input.value = campos[id] || '';
       }
-    });
 
-    // Validación Bootstrap
-    (() => {
-      'use strict';
-      const forms = document.querySelectorAll('.needs-validation');
-      Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
+    } catch (error) {
+      console.error("Error al cargar usuario:", error);
+      alert("No se pudieron cargar los datos del usuario.");
+    }
+  }
+
+  // Enviar formulario actualizado
+  async function enviarFormulario(event) {
+    event.preventDefault();
+
+    const form = this;
+    if (!form.checkValidity()) {
+      form.classList.add('was-validated');
+      return;
+    }
+
+    const datosActualizados = {
+      nombre: document.getElementById('firstName').value,
+      apellido_pa: document.getElementById('apellidoPa').value,
+      apellido_ma: document.getElementById('apellidoMa').value,
+      fechaNacimiento: document.getElementById('fecha').value,
+      institucion: document.getElementById('institucion').value,
+      cargo: document.getElementById('cargo').value
+      // correo NO se envía
+    };
+
+    try {
+      const respuesta = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosActualizados)
       });
-    })();
 
-    // Ejecutar al cargar
-    window.onload = cargarUsuario;
-  </script>
+      if (!respuesta.ok) throw new Error("No se pudo actualizar");
+
+      alert("Datos actualizados correctamente");
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      alert("Hubo un error al guardar los datos.");
+    }
+  }
+
+  // Validación Bootstrap
+  function inicializarValidacionBootstrap() {
+    const forms = document.querySelectorAll('.needs-validation');
+    forms.forEach(form => {
+      form.addEventListener('submit', function (e) {
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }
+
+  // Inicializar al cargar
+  window.onload = () => {
+    cargarUsuario();
+    inicializarValidacionBootstrap();
+    document.getElementById('formActualizar').addEventListener('submit', enviarFormulario);
+  };
+</script>
+
+
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
-<script src="../js/auth.js"></script> <!-- o la ruta correcta -->
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     validarSesion();          // redirige si no hay sesión
