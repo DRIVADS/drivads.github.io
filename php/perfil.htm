@@ -276,14 +276,14 @@
 		<small id="rolUsuario" class="text-muted">x</small>
     </div>
 
-    <form class="card p-2">
       <div class="d-grid">
         <button type="button" class="btn btn-outline-secondary">Cambiar contraseña</button>
       </div>
 	  <div class="d-grid mt-2">
-        <button type="button" class="btn btn-outline-danger">Eliminar Cuenta</button>
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalConfirmarEliminar">
+		  Eliminar Cuenta
+		</button>
       </div>
-    </form>
   </div>
 
   <!-- Panel principal: formulario editable -->
@@ -349,14 +349,36 @@
     <hr class="my-4">
     <button class="w-100 btn btn-primary btn-lg" type="submit">Guardar cambios</button>
   </form>
-	  
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+	
+<!-- Modal Confirmar Eliminación de Cuenta -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmarEliminarLabel">Eliminar cuenta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.</p>
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Ingresa tu contraseña para confirmar:</label>
+          <input type="password" class="form-control" id="confirmPassword" placeholder="Contraseña">
+        </div>
+        <div id="errorEliminar" class="text-danger small d-none">Contraseña incorrecta. Intenta de nuevo.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnEliminarConfirmado">Eliminar Cuenta</button>
+      </div>
+    </div>
   </div>
 </div>
-
-	  </div>
-  </main>
-</div>
-							
+	
 </main>
 <script src="../js/auth.js"></script> <!-- o la ruta correcta -->
 <script>
@@ -461,6 +483,71 @@
     inicializarValidacionBootstrap();
     document.getElementById('formActualizar').addEventListener('submit', enviarFormulario);
   };
+</script>
+<!-- Aqui Va lo de eliminar Modal -->
+<script>
+  document.getElementById('btnEliminarConfirmado').addEventListener('click', async () => {
+    const passwordIngresada = document.getElementById('confirmPassword').value.trim();
+    const errorDiv = document.getElementById('errorEliminar');
+
+    if (!passwordIngresada) {
+      errorDiv.textContent = "La contraseña es obligatoria.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    // Obtener el usuario actual desde sessionStorage
+    const user = JSON.parse(sessionStorage.getItem("usuario"));
+    if (!user) {
+      errorDiv.textContent = "Sesión no válida. Vuelve a iniciar sesión.";
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    try {
+      // Cargar todos los usuarios (como en el login)
+      const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+      const apiUrl = "https://smma-aobk.onrender.com/api/USUARIOS";
+
+      const response = await fetch(proxyUrl + apiUrl, {
+        headers: {
+          'Origin': 'http://localhost',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al conectar con la API");
+      }
+
+      const usuarios = await response.json();
+      const usuarioReal = usuarios.find(u => u.matricula === user.matricula);
+
+      if (!usuarioReal || usuarioReal.contrasena !== passwordIngresada) {
+        errorDiv.textContent = "Contraseña incorrecta.";
+        errorDiv.classList.remove('d-none');
+        return;
+      }
+
+      // Confirmar eliminación
+      const deleteResponse = await fetch(proxyUrl + `https://smma-aobk.onrender.com/api/usuarios/${user.matricula}`, {
+        method: 'DELETE'
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error("Error al eliminar cuenta.");
+      }
+
+      alert("Cuenta eliminada correctamente.");
+      sessionStorage.clear(); // Borrar sesión
+      window.location.href = "login.html";
+
+    } catch (error) {
+      console.error("Error al eliminar cuenta:", error);
+      errorDiv.textContent = "Error al eliminar cuenta. Intenta de nuevo.";
+      errorDiv.classList.remove('d-none');
+    }
+  });
 </script>
 
 
