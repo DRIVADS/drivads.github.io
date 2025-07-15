@@ -100,13 +100,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!user) return;
 
   const avatarImg = document.querySelector('img.rounded-circle');
-  if (avatarImg) {
-    if (user.rol === 'Administrador') {
-      avatarImg.src = "../imgs/perfil admin.png";
-      avatarImg.alt = "Administrador";
-    } else {
-      avatarImg.src = "../imgs/user.jpg";
-      avatarImg.alt = "Usuario";
-    }
+  if (!avatarImg) return;
+
+  const posiblesPrefijos = ["", "../", "../../", "../../../"];
+  const imgNombre = user.rol === "Administrador" ? "perfil admin.png" : "user.jpg";
+  const altText = user.rol === "Administrador" ? "Administrador" : "Usuario";
+
+  let imagenCargada = false;
+
+  for (let prefijo of posiblesPrefijos) {
+    const testImg = new Image();
+    testImg.src = `${prefijo}imgs/${imgNombre}`;
+
+    testImg.onload = function () {
+      if (!imagenCargada) {
+        avatarImg.src = testImg.src;
+        avatarImg.alt = altText;
+        imagenCargada = true;
+      }
+    };
   }
 });
+
