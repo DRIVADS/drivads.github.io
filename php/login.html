@@ -23,6 +23,16 @@
 
 
     <style>
+	  .modal-backdrop {
+		  z-index: 1030 !important; /* Menor que todas tus modales */
+		}
+	  #modalCargando {
+		  z-index: 1040 !important; /* Default Bootstrap valor más bajo */
+		}
+		#modalError, #modalBienvenida {
+		  z-index: 1050 !important;
+		}
+		
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -230,8 +240,24 @@
   </div>
 </div>
 	  
+<!-- Modal de error -->
+<div class="modal fade" id="modalError" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Error de autenticación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p>Correo o contraseña incorrectos. Intenta nuevamente.</p>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+	  
 <!-- Modal de carga -->
-<div class="modal fade" id="modalCargando" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalCargando" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center">
       <div class="modal-body">
@@ -241,8 +267,18 @@
     </div>
   </div>
 </div>
+
 	  
 <script>
+// Función para cerrar todas las modales activas (para evitar solapamientos)
+function cerrarTodasLasModales() {
+  const modalesActivas = document.querySelectorAll('.modal.show');
+  modalesActivas.forEach(modal => {
+    const instancia = bootstrap.Modal.getInstance(modal);
+    if (instancia) instancia.hide();
+  });
+}
+
 document.getElementById("login-form").addEventListener("submit", async function(e) {
   e.preventDefault();
 
@@ -269,7 +305,6 @@ document.getElementById("login-form").addEventListener("submit", async function(
     }
 
     const users = await response.json();
-
     const user = users.find(u => u.correo === email && u.contrasena === password);
 
     if (user) {
@@ -281,42 +316,53 @@ document.getElementById("login-form").addEventListener("submit", async function(
         correo: user.correo
       }));
 
-      modalCarga.hide(); // Oculta modal de carga
+      cerrarTodasLasModales();
 
-      // Mostrar modal de bienvenida
-      document.getElementById("mensajeBienvenida").textContent =
-        `Hola ${user.nombre}, tu rol es ${user.Rol}. ¡Nos alegra verte!`;
+      setTimeout(() => {
+        document.getElementById("mensajeBienvenida").textContent =
+          `Hola ${user.nombre}, tu rol es ${user.Rol}. ¡Nos alegra verte!`;
 
-      const modalBienvenida = new bootstrap.Modal(document.getElementById('modalBienvenida'));
-      modalBienvenida.show();
+        const modalBienvenida = new bootstrap.Modal(document.getElementById('modalBienvenida'));
+        modalBienvenida.show();
 
-      // Redirección al hacer clic en el botón "Entrar"
-      document.getElementById("btnEntrar").onclick = function() {
-        if (user.Rol === "Administrador") {
-          window.location.href = "Administrador/NodosIoT.htm";
-        } else {
-          window.location.href = "monitoreo.htm";
-        }
-      };
+        document.getElementById("btnEntrar").onclick = function() {
+          if (user.Rol === "Administrador") {
+            window.location.href = "Administrador/NodosIoT.htm";
+          } else {
+            window.location.href = "monitoreo.htm";
+          }
+        };
+      }, 300); // Espera a que se cierre bien la modal anterior
 
     } else {
-      modalCarga.hide();
-      alert("Correo o contraseña incorrectos.");
+      cerrarTodasLasModales();
+
+      setTimeout(() => {
+        const modalError = new bootstrap.Modal(document.getElementById('modalError'));
+        modalError.show();
+      }, 300);
     }
 
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
-    modalCarga.hide();
+    cerrarTodasLasModales();
     alert("Ocurrió un error al iniciar sesión. Intenta más tarde.");
   }
 });
 </script>
 
+<!-- Bootstrap y scripts auxiliares -->
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/auth.js"></script> <!-- o la ruta correcta -->
+<script src="../js/auth.js"></script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    redirigirSiYaEstaLogueado(); // Si ya hay sesión, saca al usuario del login
+    redirigirSiYaEstaLogueado(); // Redirección si ya hay sesión activa
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    redirigirSiYaEstaLogueado(); // Redirección si ya hay sesión activa
   });
 </script>
 <script>
@@ -328,12 +374,34 @@ document.getElementById("login-form").addEventListener("submit", async function(
     toggleBtn.addEventListener("click", () => {
       const tipo = passwordInput.type === "password" ? "text" : "password";
       passwordInput.type = tipo;
-
-      // Cambia el ícono
       icon.classList.toggle("bi-eye");
       icon.classList.toggle("bi-eye-slash");
     });
   });
 </script>
-    </body>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Función para cerrar modal de carga si está abierta
+    function cerrarModalCargaSiExiste() {
+      const modalCargaInstancia = bootstrap.Modal.getInstance(document.getElementById('modalCargando'));
+      if (modalCargaInstancia) modalCargaInstancia.hide();
+    }
+
+    // Evento para modal de error
+    const modalErrorEl = document.getElementById('modalError');
+    modalErrorEl.addEventListener('hidden.bs.modal', () => {
+      cerrarModalCargaSiExiste();
+    });
+
+    // Evento para modal de bienvenida
+    const modalBienvenidaEl = document.getElementById('modalBienvenida');
+    modalBienvenidaEl.addEventListener('hidden.bs.modal', () => {
+      cerrarModalCargaSiExiste();
+    });
+  });
+</script>
+<!-- Bootstrap y scripts auxiliares -->
+<script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/auth.js"></script>
+</body>
 </html>
