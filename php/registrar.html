@@ -295,7 +295,18 @@
             <label for="floatingPassword">Contraseña</label>
           </div>
 			
-          <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Registrarte</button>
+		   <!-- Checkbox obligatorio -->
+		  <div class="form-check mb-3">
+			<input class="form-check-input" type="checkbox" id="aceptoTerminos">
+			<label class="form-check-label" for="aceptoTerminos">
+			  Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#terminosModal">Términos de Uso</a>
+			</label>
+		  </div>
+			
+           <!-- Botón de registro -->
+		  <button id="btnRegistrar" class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit" disabled>
+			Registrarte
+		  </button>
 
         </form>
       </div>
@@ -321,6 +332,31 @@
     </div>
   </div>
 </div>
+	  
+<!-- Modal de Términos de Uso -->
+<div class="modal fade" id="terminosModal" tabindex="-1" aria-labelledby="terminosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="terminosLabel">Términos de Uso - SMMA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" style="overflow-x: auto; white-space: nowrap; max-height: 70vh;">
+        <div style="min-width: 800px; white-space: normal;">
+          <h6>1. Uso General</h6>
+          <p>SMMA es una plataforma informativa...</p>
+          <h6>2. Datos Proporcionados por el Usuario</h6>
+          <p>El usuario es responsable de la información que proporciona...</p>
+          <!-- Agrega aquí el resto del contenido que necesites -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+	  
 <script src="../js/userReg.js"></script>	  
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../js/auth.js"></script> <!-- o la ruta correcta -->
@@ -329,5 +365,18 @@
     redirigirSiYaEstaLogueado(); // Si ya hay sesión, saca al usuario del registro
   });
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Activar el botón solo si el checkbox está marcado
+    const checkbox = document.getElementById("aceptoTerminos");
+    const boton = document.getElementById("btnRegistrar");
+
+    checkbox.addEventListener("change", () => {
+      boton.disabled = !checkbox.checked;
+    });
+
+  });
+</script>
+
 </body>
 </html>
