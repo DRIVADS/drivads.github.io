@@ -88,7 +88,7 @@ function mostrarMenuUsuarioSiLogueado() {
           <li><hr class="dropdown-divider"></li>
 		  <li><a class="dropdown-item" href="php/Metricas.htm">Historial</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a onclick="cerrarSesion()" class="dropdown-item" href="#">Cerrar sesión</a></li>
+          <li><a onclick="cerrarSesion()" class="dropdown-item" href="php/login.html">Cerrar sesión</a></li>
         </ul>
       </div>
     `;
