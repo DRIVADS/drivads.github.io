@@ -160,14 +160,14 @@
   function obtenerGifPorTipo(tipo) {
     const tipoNormalizado = tipo.toLowerCase();
     switch (tipoNormalizado) {
-      case 'temperatura': return 'imgs/particulas.gif';
-      case 'uv': return 'imgs/radiacion-uv.gif';
-      case 'humedad': return 'imgs/lluvia.gif';
-      case 'angulo': return 'imgs/veleta.gif';
-      case 'velocidad': return 'imgs/viento.gif';
-      case 'co2': return 'imgs/co2.gif';
+      case 'temperatura': return '../imgs/particulas.gif';
+      case 'uv': return '../imgs/radiacion-uv.gif';
+      case 'humedad': return '../imgs/lluvia.gif';
+      case 'angulo': return '../imgs/veleta.gif';
+      case 'velocidad': return '../imgs/viento.gif';
+      case 'co2': return '../imgs/co2.gif';
       case 'litros': return 'https://media.giphy.com/media/3o7TKsQmoCf6Q/giphy.gif';
-      default: return 'imgs/particulas.gif';
+      default: return '../imgs/particulas.gif';
     }
   }
 
