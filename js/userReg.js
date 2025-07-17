@@ -1,5 +1,8 @@
 // JavaScript Document
-  document.getElementById("registro-form").addEventListener("submit", async function (e) {
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("registro-form");
+
+  form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const nombre = document.getElementById("nombre").value.trim();
@@ -18,6 +21,8 @@
 
     const proxy = "";
     const api = "https://smma-aobk.onrender.com/api/usuarios";
+    const modalCargando = new bootstrap.Modal(document.getElementById("cargandoModal"));
+    modalCargando.show();
 
     try {
       // Verificar si ya existe un usuario con ese correo
@@ -56,13 +61,8 @@
       }
 
       // Mostrar modal de éxito
-      const modal = new bootstrap.Modal(document.getElementById('registroExitosoModal'));
-      modal.show();
-
-      // Al cerrar el modal, redirigir al index
-      document.getElementById("btnAceptarRegistro").addEventListener("click", () => {
-        window.location.href = "../index.htm";
-      });
+      const modalExito = new bootstrap.Modal(document.getElementById('registroExitosoModal'));
+      modalExito.show();
 
     } catch (err) {
       console.error(err);
@@ -70,18 +70,32 @@
     }
   });
 
-  function mostrarAlerta(mensaje, tipo = "info") {
-    const alerta = document.createElement("div");
-    alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-    alerta.role = "alert";
-    alerta.innerHTML = `
-      ${mensaje}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    `;
-    document.getElementById("alertContainer").appendChild(alerta);
+  // Botón del modal de éxito
+  document.getElementById("btnAceptarRegistro").addEventListener("click", () => {
+    window.location.href = "../index.htm";
+  });
+});
 
-    // Remover la alerta después de 5 segundos
-    setTimeout(() => {
-      alerta.remove();
-    }, 5000);
+// Función para mostrar alertas
+function mostrarAlerta(mensaje, tipo = "info") {
+  const alerta = document.createElement("div");
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+  alerta.role = "alert";
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  `;
+  document.getElementById("alertContainer").appendChild(alerta);
+
+  // Ocultar el modal de carga si está activo
+  const cargandoModalEl = document.getElementById("cargandoModal");
+  const modalInstance = bootstrap.Modal.getInstance(cargandoModalEl);
+  if (modalInstance) {
+    modalInstance.hide();
   }
+
+  // Remover la alerta después de 5 segundos
+  setTimeout(() => {
+    alerta.remove();
+  }, 5000);
+}
