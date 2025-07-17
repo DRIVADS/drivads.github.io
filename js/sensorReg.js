@@ -36,7 +36,7 @@
     };
 
     try {
-      const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+      const proxyUrl = "";
       const apiUrl = "https://smma-aobk.onrender.com/api/SENSORS";
 
       const response = await fetch(proxyUrl + apiUrl, {

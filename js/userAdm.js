@@ -1,5 +1,5 @@
 // JavaScript Document
-  const proxy = "https://cors-anywhere.herokuapp.com/";
+  const proxy = "";
   const apiUsuarios = "https://smma-aobk.onrender.com/api/usuarios";
   let usuariosData = [];
   let matriculaAEliminar = null;

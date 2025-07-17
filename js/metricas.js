@@ -1,5 +1,5 @@
 // JavaScript Document
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  const proxyUrl = '';
   const apiBase = `${proxyUrl}https://smma-aobk.onrender.com`;
 
   const selectPais = document.getElementById('pais');

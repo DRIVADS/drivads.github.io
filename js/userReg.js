@@ -16,7 +16,7 @@
       return;
     }
 
-    const proxy = "https://cors-anywhere.herokuapp.com/";
+    const proxy = "";
     const api = "https://smma-aobk.onrender.com/api/usuarios";
 
     try {

@@ -1,5 +1,5 @@
 // JavaScript Document
-  const apiBase = 'https://cors-anywhere.herokuapp.com/https://smma-aobk.onrender.com';
+  const apiBase = 'https://smma-aobk.onrender.com';
   let sensoresCache = [];
 
   function mostrarAlerta(mensaje, tipo = 'success', tiempo = 3000) {

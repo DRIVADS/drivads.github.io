@@ -19,7 +19,7 @@ document.getElementById("login-form").addEventListener("submit", async function(
   modalCarga.show();
 
   try {
-    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+    const proxyUrl = "";
     const apiUrl = "https://smma-aobk.onrender.com/api/USUARIOS";
 
     const response = await fetch(proxyUrl + apiUrl, {

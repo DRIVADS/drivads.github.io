@@ -1,5 +1,5 @@
 // JavaScript Document
-  const proxy = "https://cors-anywhere.herokuapp.com/";
+  const proxy = "";
   const apiBase = "https://smma-aobk.onrender.com/api/zonas";
   let zonas = [];
 
