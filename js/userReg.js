@@ -1,4 +1,5 @@
 // JavaScript Document
+// JavaScript Document
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registro-form");
 
@@ -15,14 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const contrasena = document.getElementById("floatingPassword").value;
 
     if (!nombre || !apellidoPa || !correo || !contrasena) {
-      mostrarAlerta("Por favor llena todos los campos obligatorios.", "danger");
+      mostrarModalError("Por favor llena todos los campos obligatorios.");
       return;
     }
 
     const proxy = "";
     const api = "https://smma-aobk.onrender.com/api/usuarios";
-    const modalCargando = new bootstrap.Modal(document.getElementById("cargandoModal"));
-    modalCargando.show();
+    const modalCargando = new bootstrap.Modal(document.getElementById("cargandoModal"), {
+	  backdrop: 'static',
+	  keyboard: false
+	});
 
     try {
       // Verificar si ya existe un usuario con ese correo
@@ -31,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const existeCorreo = usuarios.some(u => u.correo.toLowerCase() === correo.toLowerCase());
 
       if (existeCorreo) {
-        mostrarAlerta("El correo ya está registrado. Usa otro.", "warning");
+        modalCargando.hide();
+        mostrarModalError("El correo ya está registrado. Usa otro.");
         return;
       }
 
@@ -54,48 +58,35 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(nuevoUsuario)
       });
 
+      modalCargando.hide();
+
       if (!res.ok) {
         const err = await res.json();
-        mostrarAlerta("Error al registrar: " + (err.message || "Intenta más tarde."), "danger");
+        mostrarModalError("Error al registrar: " + (err.message || "Intenta más tarde."));
         return;
       }
 
-      // Mostrar modal de éxito
-      const modalExito = new bootstrap.Modal(document.getElementById('registroExitosoModal'));
+      const modalExito = new bootstrap.Modal(document.getElementById('registroExitosoModal'), {});
       modalExito.show();
 
     } catch (err) {
       console.error(err);
-      mostrarAlerta("Error inesperado al registrar.", "danger");
+      modalCargando.hide();
+      mostrarModalError("Error inesperado al registrar.");
     }
   });
 
-  // Botón del modal de éxito
+  // Botón de redirección después del registro exitoso
   document.getElementById("btnAceptarRegistro").addEventListener("click", () => {
     window.location.href = "../index.htm";
   });
 });
 
-// Función para mostrar alertas
-function mostrarAlerta(mensaje, tipo = "info") {
-  const alerta = document.createElement("div");
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-  alerta.role = "alert";
-  alerta.innerHTML = `
-    ${mensaje}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-  `;
-  document.getElementById("alertContainer").appendChild(alerta);
+// Mostrar error en un modal
+function mostrarModalError(mensaje) {
+  const mensajeEl = document.getElementById("mensajeErrorModal");
+  mensajeEl.textContent = mensaje;
 
-  // Ocultar el modal de carga si está activo
-  const cargandoModalEl = document.getElementById("cargandoModal");
-  const modalInstance = bootstrap.Modal.getInstance(cargandoModalEl);
-  if (modalInstance) {
-    modalInstance.hide();
-  }
-
-  // Remover la alerta después de 5 segundos
-  setTimeout(() => {
-    alerta.remove();
-  }, 5000);
+  const modalError = new bootstrap.Modal(document.getElementById("modalError"), {});
+  modalError.show();
 }
