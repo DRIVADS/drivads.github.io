@@ -22,6 +22,23 @@
 	<meta name="theme-color" content="#712cf9">
 
     <style>
+		
+	  /* Fondo del modal (backdrop): z-index más bajo para que otros modales estén encima */
+		.modal-backdrop {
+		  z-index: 1030 !important;
+		}
+
+		/* Modal de carga ligeramente encima del backdrop, pero debajo de otros modales */
+		#cargandoModal {
+		  z-index: 1040 !important;
+		}
+
+		/* Modales principales (éxito, error, bienvenida, etc.) con z-index más alto */
+		#registroExitosoModal,
+		#modalError,
+		#modalBienvenida {
+		  z-index: 1050 !important;
+		}
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -328,6 +345,20 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="btnAceptarRegistro" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de carga -->
+<div class="modal fade" id="cargandoModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <div class="mt-3">
+        <strong>Registrando usuario, por favor espera...</strong>
       </div>
     </div>
   </div>
