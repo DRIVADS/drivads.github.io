@@ -233,24 +233,17 @@
 			<h4 class="mb-3">Formulario de Contacto</h4>
 			<form class="needs-validation" novalidate>
 			  <div class="row g-3">
+				  
 				<div class="col-md-6">
 				  <label for="nombre" class="form-label">Nombre</label>
-				  <input type="text" class="form-control" id="nombre" placeholder="Ej. Juan Pérez" required>
-				  <div class="invalid-feedback">Ingresa tu nombre.</div>
+				  <input type="text" class="form-control" id="nombre" readonly>
 				</div>
 
 				<div class="col-md-6">
 				  <label for="correo" class="form-label">Correo Electrónico</label>
-				  <input type="email" class="form-control" id="correo" placeholder="ejemplo@correo.com" required>
-				  <div class="invalid-feedback">Ingresa un correo válido.</div>
+				  <input type="email" class="form-control" id="correo" readonly>
 				</div>
-
-				<div class="col-md-6">
-				  <label for="telefono" class="form-label">Teléfono</label>
-				  <input type="tel" class="form-control" id="telefono" placeholder="Ej. +52 55 1234 5678" required>
-				  <div class="invalid-feedback">Ingresa un número válido.</div>
-				</div>
-
+				  
 				<div class="col-md-6">
 				  <label for="asunto" class="form-label">Asunto</label>
 				  <select class="form-select" id="asunto" required>
@@ -279,10 +272,20 @@
 </div>
 	
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector(".needs-validation");
+  const usuario = obtenerUsuario(); // Desde auth.js
 
-  form.addEventListener("submit", function(event) {
+  if (usuario) {
+    const nombreInput = document.getElementById("nombre");
+    const correoInput = document.getElementById("correo");
+
+    if (nombreInput) nombreInput.value = usuario.nombre;
+    if (correoInput) correoInput.value = usuario.correo;
+  }
+
+  // Validación Bootstrap
+  form.addEventListener("submit", function (event) {
     if (!form.checkValidity()) {
       event.preventDefault();
       event.stopPropagation();
@@ -291,7 +294,8 @@ document.addEventListener("DOMContentLoaded", function() {
     form.classList.add("was-validated");
   });
 });
-</script>					
+</script>
+				
 </main>
 <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://getbootstrap.com/docs/5.3/examples/sidebars/sidebars.js"></script>
