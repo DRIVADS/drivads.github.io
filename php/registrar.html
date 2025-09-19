@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.122.0">
     <title>Registro-SMMA</title>
 
@@ -119,7 +118,6 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="modals.css" rel="stylesheet">
   </head>
   <body>
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -364,7 +362,6 @@
   </div>
 </div>
 	  
-<!-- Modal de Términos de Uso -->
 <!-- Modal: Términos de Uso -->
 <div class="modal fade" id="terminosModal" tabindex="-1" aria-labelledby="terminosLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -412,6 +409,24 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+	  
+<!-- Modal de Error -->
+<div class="modal fade" id="modalError" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="mensajeErrorModal"></p> <!-- 👈 Este id es el que usa tu JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
       </div>
     </div>
   </div>
